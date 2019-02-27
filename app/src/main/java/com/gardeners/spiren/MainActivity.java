@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton bugSprayBtn;
     private ImageButton fertalizeBtn;
 
+    private ImageButton helpBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
         bugSprayBtn = (ImageButton) findViewById(R.id.bugspraybutton);
         fertalizeBtn = (ImageButton) findViewById(R.id.fertilizerbutton);
 
+        helpBtn = (ImageButton) findViewById(R.id.helpbutton);
+
         waterBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 plant.waterPlant();
@@ -86,6 +89,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 plant.fertelizPlant();
                 updateInfo();
+            }
+        });
+
+        helpBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //TODO
             }
         });
 
