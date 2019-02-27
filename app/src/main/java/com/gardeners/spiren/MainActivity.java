@@ -13,6 +13,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,8 +46,9 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar water;
     private ProgressBar fertalizer;
 
-    private Button waterBtn;
-    private Button fertalizeBtn;
+    private ImageButton waterBtn;
+    private ImageButton bugSprayBtn;
+    private ImageButton fertalizeBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,8 +71,9 @@ public class MainActivity extends AppCompatActivity {
         updateInfo();
 
         //Setting up buttons
-        waterBtn = (Button) findViewById(R.id.waterBtn);
-        fertalizeBtn = (Button) findViewById(R.id.fertalizeBtn);
+        waterBtn = (ImageButton) findViewById(R.id.watercanbutton);
+        bugSprayBtn = (ImageButton) findViewById(R.id.bugspraybutton);
+        fertalizeBtn = (ImageButton) findViewById(R.id.fertilizerbutton);
 
         waterBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
