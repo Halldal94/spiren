@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
         fertalizeBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                plant.fertelizPlant();
+                plant.fertelizerPlant();
                 updateInfo();
             }
         });
