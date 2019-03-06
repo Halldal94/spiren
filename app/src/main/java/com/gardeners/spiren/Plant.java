@@ -2,8 +2,12 @@ package com.gardeners.spiren;
 
 import android.util.Log;
 
+import org.json.JSONObject;
+
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -18,8 +22,8 @@ public class Plant {
 
     private int length, health , water, fertelizer, bugs, members;
     private int level, maxHealth, maxWater, maxBugs;
-    private List<Integer> playerSum;
-    private Date now, previus;
+    private static List<Integer> playerSum;
+    private Date previusAction;
 
     public Plant(MainActivity game){
         this.game = game;
@@ -33,9 +37,9 @@ public class Plant {
 
     private void stupidNoDataInit(){
         this.length = 140;
-        this.health = 50;
-        this.water = 30;
-        this.fertelizer = 70;
+        this.health = 1;
+        this.water = 0;
+        this.fertelizer = 0;
         this.members = 1;
         this.level = 1;
 
@@ -58,23 +62,11 @@ public class Plant {
                 break;
         }
 
-        this.playerSum = new ArrayList<Integer>();
-        playerSum.add(40);
-        playerSum.add(23);
-        playerSum.add(14);
-        playerSum.add(13);
-        playerSum.add(10);
-        playerSum.add(9);
-        playerSum.add(8);
-        playerSum.add(7);
-        playerSum.add(6);
-        playerSum.add(6);
-        playerSum.add(5);
-        playerSum.add(5);
+        this.playerSum = Arrays.asList(40, 23, 14, 13, 10, 9, 8, 7, 6, 6, 5, 5);
     }
 
-    public String getLength(){
-        return length + " cm";
+    public int getLength(){
+        return length;
     }
 
     public int getHealth(){
@@ -89,13 +81,35 @@ public class Plant {
         return fertelizer;
     }
 
+    public int getBugs(){
+        return bugs;
+    }
+
+    public int getMembers(){
+        return members;
+    }
+
+    public int getLevel(){
+        return level;
+    }
+
+    public Date getPrevius() {
+        return previusAction;
+    }
+
     public void waterPlant(){
-        water += playerSum.get(members - 1);
-        calculateHealth();
+        if(!isSameDay(previusAction, new Date())) {
+            water += playerSum.get(members - 1);
+            calculateHealth();
+            previusAction = new Date();
+        }
     }
 
     public void fertelizerPlant(){
-        fertelizer += playerSum.get(members - 1);
+        if(!isSameDay(previusAction, new Date())) {
+            fertelizer += playerSum.get(members - 1);
+            previusAction = new Date();
+        }
     }
 
     public void calculateHealth(){
@@ -103,7 +117,10 @@ public class Plant {
     }
 
     public void killBugs(){
-        bugs -= 1;
+        if(!isSameDay(previusAction, new Date())){
+            bugs -= 1;
+            previusAction = new Date();
+        }
     }
 
     public void growTimer(){
@@ -137,6 +154,14 @@ public class Plant {
         timer.schedule (spawn, 0l, 1000*60*60);
     }
 
+    private boolean isSameDay(Date day1, Date day2){
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTime(day1);
+        cal2.setTime(day2);
+        return cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR) && cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR);
+    }
+
     public void grow(){
         float percent = (maxHealth/health) * 100;
         if (percent < 25){
@@ -150,6 +175,9 @@ public class Plant {
         } else {
             length += 8 + ((fertelizer / 100) * 4);
         }
+        if(length < 140){
+            length = 140;
+        }
         game.updateInfo();
     }
 
@@ -157,6 +185,21 @@ public class Plant {
         for(int i = 0; i < 20; i++){
             waterPlant();
             members += 1;
+        }
+    }
+
+    public void loadData(JSONObject data){
+        try {
+            length = (Integer) data.get("length");
+            health = (Integer) data.get("health");
+            water = (Integer) data.get("water");
+            fertelizer = (Integer) data.get("fertelizer");
+            bugs = (Integer) data.get("bugs");
+            members = (Integer) data.get("members");
+            level = (Integer) data.get("level");
+            previusAction = (Date) new Date((String) data.get("previus"));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
