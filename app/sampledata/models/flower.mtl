@@ -1,0 +1,25 @@
+# Blender MTL File: 'plante.blend'
+# Material Count: 2
+
+newmtl Flower_leaves
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.651215 0.507712 0.026984
+Ks 0.007995 0.007995 0.007995
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.000000
+illum 2
+map_Kd textures/flower.png
+map_d textures/flower.png
+
+newmtl Sunflower_pod
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.072664 0.025874 0.006043
+Ks 0.007333 0.007333 0.007333
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd textures/flower2.png
