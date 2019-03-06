@@ -14,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +26,7 @@ import com.google.ar.core.Plane;
 import com.google.ar.core.Session;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.rendering.ModelRenderable;
+import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
 
@@ -37,6 +39,12 @@ public class MainActivity extends AppCompatActivity {
 
     private ArFragment arFragment;
     private ModelRenderable andyRenderable;
+
+    //Test status bar
+    private ViewRenderable renderrable;
+    private ImageView imgView;
+
+
     //private Session session;
 
     private Plant plant;
@@ -131,6 +139,19 @@ public class MainActivity extends AppCompatActivity {
                     andy.setRenderable(andyRenderable);
                     andy.select();
                 });
+
+
+        /*
+        * Test "status bar"
+        *
+        ViewRenderable.builder()
+                .setView(this, R.layout.status_bar)
+                .build()
+                .thenAccept(renderable -> {
+                    ImageView imgView = (ImageView)renderrable.getView();
+                });
+        */
+
     }
 
     /**
