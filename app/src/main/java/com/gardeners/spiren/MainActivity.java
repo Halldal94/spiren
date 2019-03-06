@@ -30,8 +30,14 @@ import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
 
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.Dictionary;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -77,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         water = (ProgressBar) findViewById(R.id.water);
         fertalizer = (ProgressBar) findViewById(R.id.fertelizer);
         plant.growTimer();
+        loadData();
         updateInfo();
 
         //Setting up buttons
@@ -154,6 +161,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        saveData();
+    }
+
     /**
      * Returns false and displays an error message if Sceneform can not run, true if Sceneform can run
      * on this device.
@@ -168,11 +181,51 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateInfo(){
-        height.setText(plant.getLength());
+        height.setText(String.valueOf(plant.getLength()) + " cm");
         health.setProgress(plant.getHealth());
         water.setProgress(plant.getWater());
         fertalizer.setProgress(plant.getFertelizer());
     }
+
+    private void saveData(){
+        String filename = "save";
+        JSONObject content = new JSONObject();
+        try {
+            content.put("length", plant.getLength());
+            content.put("health", plant.getHealth());
+            content.put("water", plant.getWater());
+            content.put("fertelizer", plant.getFertelizer());
+            content.put("bugs", plant.getBugs());
+            content.put("members", plant.getMembers());
+            content.put("level", plant.getLevel());
+            content.put("previus", plant.getPrevius().toString());
+            try {
+                FileOutputStream outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                outputStream.write(content.toString().getBytes());
+                outputStream.close();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadData() {
+        String filename = "save";
+        File directory = this.getFilesDir();
+        File file = new File(directory, filename);
+        if(file != null || file.exists()) {
+            try {
+                byte[] encoded = Files.readAllBytes(file.toPath());
+                JSONObject load = new JSONObject(new String(encoded));
+                plant.loadData(load);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     public static boolean checkIsSupportedDeviceOrFinish(final Activity activity) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
