@@ -25,8 +25,6 @@ public class Plant {
         this.game = game;
         fetchData();
         stupidNoDataInit();
-        testData();
-        growTimer();
     }
 
     private void fetchData(){
@@ -34,7 +32,7 @@ public class Plant {
     }
 
     private void stupidNoDataInit(){
-        this.length = 20;
+        this.length = 140;
         this.health = 50;
         this.water = 30;
         this.fertelizer = 70;
@@ -108,7 +106,7 @@ public class Plant {
         bugs -= 1;
     }
 
-    private void growTimer(){
+    public void growTimer(){
         Calendar today = Calendar.getInstance();
         today.set(Calendar.HOUR_OF_DAY, 12);
         today.set(Calendar.MINUTE, 0);

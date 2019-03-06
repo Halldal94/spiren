@@ -71,12 +71,12 @@ public class MainActivity extends AppCompatActivity {
         arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
 
         //Setting up text and progress bars
-        plant = new Plant();
+        plant = new Plant(this);
         height = (TextView) findViewById(R.id.Height);
         health = (ProgressBar) findViewById(R.id.Health);
         water = (ProgressBar) findViewById(R.id.water);
         fertalizer = (ProgressBar) findViewById(R.id.fertelizer);
-
+        plant.growTimer();
         updateInfo();
 
         //Setting up buttons
