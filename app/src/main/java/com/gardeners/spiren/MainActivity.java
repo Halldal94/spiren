@@ -24,6 +24,7 @@ import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
+import com.google.ar.sceneform.ux.TransformableNode;
 
 import org.json.JSONObject;
 
@@ -117,24 +118,25 @@ public class MainActivity extends AppCompatActivity {
                             toast.show();
                             return null;
                         });
-        arFragment.setOnTapArPlaneListener(
+
+        // Denne tegner status bar PS: husk og ikke opdatere verdier før denne er tegnet
+        /*arFragment.setOnTapArPlaneListener(
                 (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
                     if (statusBarRenderable == null) {
                         return;
                     }
 
-                    // Create the Anchor.
                     Anchor anchor = hitResult.createAnchor();
                     AnchorNode anchorNode = new AnchorNode(anchor);
                     anchorNode.setParent(arFragment.getArSceneView().getScene());
 
-                    // Create the transformable andy and add it to the anchor.
-                    Node andy = new Node();
-                    andy.setParent(anchorNode);
-                    andy.setRenderable(statusBarRenderable);
+                    Node statusBar = new Node();
+                    statusBar.setParent(anchorNode);
+                    statusBar.setRenderable(statusBarRenderable);
                     updateInfo();
-                });
-        /*arFragment.setOnTapArPlaneListener(
+                });*/
+
+        arFragment.setOnTapArPlaneListener(
                 (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
                     if (andyRenderable == null) {
                         return;
@@ -150,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                     andy.setParent(anchorNode);
                     andy.setRenderable(andyRenderable);
                     andy.select();
-                });*/
+                });
 
 
         /*
