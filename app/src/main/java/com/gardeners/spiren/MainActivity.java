@@ -19,6 +19,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gardeners.spiren.weather.Hour;
+import com.gardeners.spiren.weather.WeatherData;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.AugmentedImageDatabase;
 import com.google.ar.core.HitResult;
@@ -38,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Dictionary;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -65,6 +68,11 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton fertalizeBtn;
 
     private ImageButton helpBtn;
+
+    // Weather data
+    private WeatherData weather;
+    private TextView tvTemperature;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -159,6 +167,29 @@ public class MainActivity extends AppCompatActivity {
                 });
         */
 
+
+        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-= Weather =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+        tvTemperature = findViewById(R.id.tvTemperature);
+        String t = "3\u2103";
+        tvTemperature.setText(t);
+
+        weather = new WeatherData(this);
+        weather.download();
+
+        tvTemperature.setOnClickListener((View v) -> {
+            // TODO: Open forecast in fragment or new activity
+            Toast.makeText(this, "Clickity Clack", Toast.LENGTH_SHORT).show();
+
+            List<Hour> hours = weather.getHours();
+            if (hours.size() > 0) {
+                String temp = String.valueOf(hours.get(0).getTemperature()) + "\u2103";
+                tvTemperature.setText(temp);
+            }
+        });
+
+        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
     }
 
     @Override
@@ -247,4 +278,9 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
+    public void updateTemperature() {
+
+    }
+
 }
