@@ -97,6 +97,11 @@ public class Plant {
         return previusAction;
     }
 
+    public void resetPreviusAction(){
+        Log.d("devTest", "reset action");
+        previusAction = new Date(1994, 2, 4);
+    }
+
     public void waterPlant(){
         if(!isSameDay(previusAction, new Date())) {
             water += playerSum.get(members - 1);
@@ -118,8 +123,10 @@ public class Plant {
 
     public void killBugs(){
         if(!isSameDay(previusAction, new Date())){
-            bugs -= 1;
-            previusAction = new Date();
+            if (bugs -1 >= 0) {
+                bugs -= 1;
+                previusAction = new Date();
+            }
         }
     }
 
@@ -154,6 +161,16 @@ public class Plant {
         timer.schedule (spawn, 0l, 1000*60*60);
     }
 
+    public void bugSpawnerDev(){
+        if (bugs + 1 <= maxBugs){
+            Log.d("devTest", "spawn bugs");
+            bugs += 1;
+            calculateHealth();
+        } else {
+            Log.d("devTest", "too many bugs");
+        }
+    }
+
     private boolean isSameDay(Date day1, Date day2){
         if(day1 != null && day2 != null){
             Calendar cal1 = Calendar.getInstance();
@@ -166,6 +183,7 @@ public class Plant {
     }
 
     public void grow(){
+        Log.d("devTest", "growing");
         float percent = (maxHealth/health) * 100;
         if (percent < 25){
             length -= 8 - ((fertelizer / 100) * 4);

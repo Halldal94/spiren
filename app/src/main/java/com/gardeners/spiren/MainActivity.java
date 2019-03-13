@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -42,10 +43,13 @@ public class MainActivity extends AppCompatActivity {
     private ViewRenderable renderrable, statusBarRenderable;
     private ImageView imgView;
     private Plant plant;
-    private TextView height;
+    private TextView height, bugCount;
     private ProgressBar health, water, fertalizer;
     private ImageButton waterBtn, bugSprayBtn, fertalizeBtn, helpBtn;
     private View statusBarView;
+    private Button grow, bugs, action;
+
+    private boolean developerMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +73,10 @@ public class MainActivity extends AppCompatActivity {
         fertalizeBtn = (ImageButton) findViewById(R.id.fertilizerbutton);
 
         helpBtn = (ImageButton) findViewById(R.id.helpbutton);
+
+        if (developerMode){
+            setUpDeveloperEnv();
+        }
 
         waterBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -97,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
                 .thenAccept(renderrable -> {
                     statusBarView = statusBarRenderable.getView();
                     height = statusBarView.findViewById(R.id.height);
+                    bugCount = statusBarView.findViewById(R.id.bug_count);
                     health = statusBarView.findViewById(R.id.health);
                     water = statusBarView.findViewById(R.id.water);
                     fertalizer = statusBarView.findViewById(R.id.fertelizer);
@@ -120,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
                         });
 
         // Denne tegner status bar PS: husk og ikke opdatere verdier før denne er tegnet
-        /*arFragment.setOnTapArPlaneListener(
+        arFragment.setOnTapArPlaneListener(
                 (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
                     if (statusBarRenderable == null) {
                         return;
@@ -134,9 +143,9 @@ public class MainActivity extends AppCompatActivity {
                     statusBar.setParent(anchorNode);
                     statusBar.setRenderable(statusBarRenderable);
                     updateInfo();
-                });*/
+                });
 
-        arFragment.setOnTapArPlaneListener(
+        /*arFragment.setOnTapArPlaneListener(
                 (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
                     if (andyRenderable == null) {
                         return;
@@ -152,20 +161,45 @@ public class MainActivity extends AppCompatActivity {
                     andy.setParent(anchorNode);
                     andy.setRenderable(andyRenderable);
                     andy.select();
-                });
+                });*/
+    }
 
+    private void setUpDeveloperEnv() {
+        grow = (Button) findViewById(R.id.grow);
+        bugs = (Button) findViewById(R.id.bugs);
+        action = (Button) findViewById(R.id.action);
 
-        /*
-        * Test "status bar"
-        *
-        ViewRenderable.builder()
-                .setView(this, R.layout.status_bar)
-                .build()
-                .thenAccept(renderable -> {
-                    ImageView imgView = (ImageView)renderrable.getView();
-                });
-        */
+        grow.setVisibility(View.VISIBLE);
+        bugs.setVisibility(View.VISIBLE);
+        action.setVisibility(View.VISIBLE);
 
+        grow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(developerMode){
+                    plant.grow();
+                }
+            }
+        });
+
+        bugs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(developerMode){
+                    plant.bugSpawnerDev();
+                    updateInfo();
+                }
+            }
+        });
+
+        action.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(developerMode){
+                    plant.resetPreviusAction();
+                }
+            }
+        });
     }
 
     @Override
@@ -189,6 +223,7 @@ public class MainActivity extends AppCompatActivity {
             health.setProgress(plant.getHealth());
             water.setProgress(plant.getWater());
             fertalizer.setProgress(plant.getFertelizer());
+            bugCount.setText(plant.getBugs() + " Bugs");
         }
     }
 
