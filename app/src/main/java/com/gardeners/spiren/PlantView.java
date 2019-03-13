@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 
 public class PlantView {
-    private static final Random RANDOM = new Random();
     private static final int leafSparsity = 4;
 
     private final ModelRenderable leafRenderable;
@@ -18,13 +17,15 @@ public class PlantView {
     private final Node stalk;
     private final Node flower;
     private final List<Node> leaves;
+    private final long seed;
 
-    public PlantView(ModelRenderable leafRenderable, Node root, Node stalk, Node flower) {
+    public PlantView(ModelRenderable leafRenderable, Node root, Node stalk, Node flower, long seed) {
         this.leafRenderable = leafRenderable;
         this.root = root;
         this.stalk = stalk;
         this.flower = flower;
         this.leaves = new ArrayList<>();
+        this.seed = seed;
     }
 
     public void setHeight(int height) {
@@ -53,7 +54,7 @@ public class PlantView {
         }
 
         // Update scale of all leaves
-        Random random = new Random(0xDEADBEEFDEADBEEFL);
+        Random random = new Random(seed);
         for (int i = 0; i < leaves.size(); i++) {
             int position = i * leafSparsity;
             Node leaf = leaves.get(i);

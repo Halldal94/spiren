@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
                     flowerNode.setParent(pot);
                     flowerNode.setRenderable(flowerRenderable);
 
-                    plantView = new PlantView(leafRenderable, pot, stalk, flowerNode);
+                    plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, 0xDEADBEEFDEADBEEFL);
                     plantView.setHeight(heightSlider.getProgress());
                 });
     }
