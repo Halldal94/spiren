@@ -10,25 +10,22 @@
           metallic: 0,
         },
         {
-          roughness: 0.1,
-        },
-        {
-          opacity: 1.0,
+          roughness: 0.9,
         },
       ],
-      source: 'build/sceneform_sdk/default_materials/obj_material.sfm',
+      source: 'sampledata/models/obj_material_two_sided_alpha_test.sfm',
     },
     {
       name: 'Sunflower_pod',
       parameters: [
         {
-          baseColor: 'flower2',
+          baseColor: 'flower_pod',
         },
         {
           metallic: 0,
         },
         {
-          roughness: 0.5,
+          roughness: 0.9,
         },
         {
           opacity: null,
@@ -51,9 +48,9 @@
   },
   samplers: [
     {
-      file: 'sampledata/models/textures/flower2.png',
-      name: 'flower2',
-      pipeline_name: 'textures/flower2.png',
+      file: 'sampledata/models/textures/flower_pod.png',
+      name: 'flower_pod',
+      pipeline_name: 'textures/flower_pod.png',
     },
     {
       file: 'sampledata/models/textures/flower.png',

@@ -11,7 +11,7 @@ import java.util.Random;
 
 public class PlantView {
     private static final Random RANDOM = new Random();
-    private static final int leafSparsity = 5;
+    private static final int leafSparsity = 4;
 
     private final ModelRenderable leafRenderable;
     private final Node root;
@@ -29,19 +29,18 @@ public class PlantView {
 
     public void setHeight(int height) {
         float stalkHeight = height / 100.0F;
-        float stalkThickness = 0.25F + height / 150.0F;
+        float stalkThickness = 0.175F + height / 300.0F;
         float flowerSize = 0.25F + height / 150.0F;
 
         stalk.setLocalScale(new Vector3(stalkThickness, stalkHeight, stalkThickness));
         flower.setLocalPosition(new Vector3(0.0F, stalkHeight, 0.0F));
         flower.setLocalScale(new Vector3(flowerSize, flowerSize, flowerSize));
 
-        int numLeaves = height / leafSparsity;
+        int numLeaves = Math.max(0, (height - 10) / leafSparsity);
 
         // Add leaves, if any should be added
         for (int i = leaves.size(); i < numLeaves; i++) {
             Node leaf = new Node();
-            leaf.setLocalRotation(Quaternion.axisAngle(new Vector3(0.0F, 1.0F, 0.0F), RANDOM.nextFloat() * 360.0F));
             leaf.setParent(root);
             leaf.setLocalPosition(new Vector3(0.0F, leafSparsity * (i + 0.5F) / 100.0F, 0.0F));
             leaf.setRenderable(leafRenderable);
@@ -54,10 +53,16 @@ public class PlantView {
         }
 
         // Update scale of all leaves
+        Random random = new Random(0xDEADBEEFDEADBEEFL);
         for (int i = 0; i < leaves.size(); i++) {
+            int position = i * leafSparsity;
             Node leaf = leaves.get(i);
-            float scale = (height - i * leafSparsity) / 50.0F;
+            float scale = 0.5F + (height - position) / 40.0F;
             leaf.setLocalScale(new Vector3(scale, scale, scale));
+            Quaternion yRotation = Quaternion.axisAngle(new Vector3(0.0F, 1.0F, 0.0F), random.nextFloat() * 360.0F);
+            Quaternion xRotation = Quaternion.axisAngle(new Vector3(1.0F, 0.0F, 0.0F), random.nextFloat() * 60.0F - (height - position) / 2.0F);
+            // Quaternion xRotation = Quaternion.axisAngle(new Vector3(1.0F, 0.0F, 0.0F), random.nextFloat() * 60.0F - 30.0F);
+            leaf.setLocalRotation(Quaternion.multiply(yRotation, xRotation));
         }
     }
 }
