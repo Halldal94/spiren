@@ -3,8 +3,6 @@ package com.gardeners.spiren;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,7 +10,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -20,11 +17,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
-import com.google.ar.core.AugmentedImageDatabase;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
-import com.google.ar.core.Session;
 import com.google.ar.sceneform.AnchorNode;
+import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
@@ -34,10 +30,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Dictionary;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -46,25 +39,14 @@ public class MainActivity extends AppCompatActivity {
     private ArFragment arFragment;
     private ModelRenderable andyRenderable;
 
-    //Test status bar
-    private ViewRenderable renderrable;
+    private ViewRenderable renderrable, statusBarRenderable;
     private ImageView imgView;
-
-
-    //private Session session;
-
     private Plant plant;
-
     private TextView height;
-    private ProgressBar health;
-    private ProgressBar water;
-    private ProgressBar fertalizer;
+    private ProgressBar health, water, fertalizer;
+    private ImageButton waterBtn, bugSprayBtn, fertalizeBtn, helpBtn;
+    private View statusBarView;
 
-    private ImageButton waterBtn;
-    private ImageButton bugSprayBtn;
-    private ImageButton fertalizeBtn;
-
-    private ImageButton helpBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,13 +60,8 @@ public class MainActivity extends AppCompatActivity {
 
         //Setting up text and progress bars
         plant = new Plant(this);
-        height = (TextView) findViewById(R.id.Height);
-        health = (ProgressBar) findViewById(R.id.Health);
-        water = (ProgressBar) findViewById(R.id.water);
-        fertalizer = (ProgressBar) findViewById(R.id.fertelizer);
         plant.growTimer();
-        loadData();
-        updateInfo();
+        //loadData();
 
         //Setting up buttons
         waterBtn = (ImageButton) findViewById(R.id.watercanbutton);
@@ -113,6 +90,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        ViewRenderable.builder()
+                .setView(this, R.layout.status_bar)
+                .build()
+                .thenAccept(renderable -> statusBarRenderable = renderable)
+                .thenAccept(renderrable -> {
+                    statusBarView = statusBarRenderable.getView();
+                    height = statusBarView.findViewById(R.id.height);
+                    health = statusBarView.findViewById(R.id.health);
+                    water = statusBarView.findViewById(R.id.water);
+                    fertalizer = statusBarView.findViewById(R.id.fertelizer);
+                });
+
         //AugmentedImageDatabase imageDatabase = new AugmentedImageDatabase(session);
 
         // When you build a Renderable, Sceneform loads its resources in the background while returning
@@ -129,6 +118,24 @@ public class MainActivity extends AppCompatActivity {
                             toast.show();
                             return null;
                         });
+
+        // Denne tegner status bar PS: husk og ikke opdatere verdier før denne er tegnet
+        /*arFragment.setOnTapArPlaneListener(
+                (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
+                    if (statusBarRenderable == null) {
+                        return;
+                    }
+
+                    Anchor anchor = hitResult.createAnchor();
+                    AnchorNode anchorNode = new AnchorNode(anchor);
+                    anchorNode.setParent(arFragment.getArSceneView().getScene());
+
+                    Node statusBar = new Node();
+                    statusBar.setParent(anchorNode);
+                    statusBar.setRenderable(statusBarRenderable);
+                    updateInfo();
+                });*/
+
         arFragment.setOnTapArPlaneListener(
                 (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
                     if (andyRenderable == null) {
@@ -176,15 +183,13 @@ public class MainActivity extends AppCompatActivity {
      * <p>Finishes the activity if Sceneform can not run
      */
 
-    public void onDrawFrame(){
-        Log.i("System is", "drawing frame");
-    }
-
     public void updateInfo(){
-        height.setText(String.valueOf(plant.getLength()) + " cm");
-        health.setProgress(plant.getHealth());
-        water.setProgress(plant.getWater());
-        fertalizer.setProgress(plant.getFertelizer());
+        if(health != null){
+            height.setText(String.valueOf(plant.getLength()) + " cm");
+            health.setProgress(plant.getHealth());
+            water.setProgress(plant.getWater());
+            fertalizer.setProgress(plant.getFertelizer());
+        }
     }
 
     private void saveData(){
