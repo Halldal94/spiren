@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.ar.core.Anchor;
 import com.google.ar.core.AugmentedImageDatabase;
@@ -38,6 +39,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Dictionary;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -64,7 +67,9 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton bugSprayBtn;
     private ImageButton fertalizeBtn;
 
-    private ImageButton helpBtn;
+    private TextView helpText;
+
+    private ToggleButton helpBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
         health = (ProgressBar) findViewById(R.id.Health);
         water = (ProgressBar) findViewById(R.id.water);
         fertalizer = (ProgressBar) findViewById(R.id.fertelizer);
+        helpText = (TextView) findViewById(R.id.helpText);
+
         plant.growTimer();
         loadData();
         updateInfo();
@@ -91,12 +98,46 @@ public class MainActivity extends AppCompatActivity {
         bugSprayBtn = (ImageButton) findViewById(R.id.bugspraybutton);
         fertalizeBtn = (ImageButton) findViewById(R.id.fertilizerbutton);
 
-        helpBtn = (ImageButton) findViewById(R.id.helpbutton);
+        helpBtn = (ToggleButton) findViewById(R.id.helpbutton);
+
+        bugSprayBtn.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+
+                Timer buttonTimer = new Timer();
+                buttonTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                bugSprayBtn.setEnabled(true);
+                                bugSprayBtn.setPressed(true);
+                            }
+                        });
+                    }
+                }, 1000);
+            }
+        });
+
 
         waterBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                plant.waterPlant();
-                updateInfo();
+
+                Timer buttonTimer = new Timer();
+                buttonTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                waterBtn.setEnabled(true);
+                                waterBtn.setPressed(true);
+                            }
+                        });
+                    }
+                }, 1000);
             }
         });
 
@@ -104,14 +145,37 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 plant.fertelizerPlant();
                 updateInfo();
+
+                Timer buttonTimer = new Timer();
+                buttonTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                fertalizeBtn.setEnabled(true);
+                                fertalizeBtn.setPressed(true);
+                            }
+                        });
+                    }
+                }, 1000);
             }
         });
 
+
         helpBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //TODO
+                if (helpBtn.isChecked()){
+                    helpText.setVisibility(View.VISIBLE);
+                    helpText.setText("Plants are cool. \nPlants are friends. \nIf you kill a plant, this is how it ends.");
+                } else {
+                    helpText.setVisibility(View.INVISIBLE);
+                }
             }
         });
+
+
 
         //AugmentedImageDatabase imageDatabase = new AugmentedImageDatabase(session);
 
@@ -148,16 +212,6 @@ public class MainActivity extends AppCompatActivity {
                 });
 
 
-        /*
-        * Test "status bar"
-        *
-        ViewRenderable.builder()
-                .setView(this, R.layout.status_bar)
-                .build()
-                .thenAccept(renderable -> {
-                    ImageView imgView = (ImageView)renderrable.getView();
-                });
-        */
 
     }
 
