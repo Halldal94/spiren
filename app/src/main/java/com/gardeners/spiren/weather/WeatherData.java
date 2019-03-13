@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -19,6 +20,9 @@ import java.util.Locale;
 
 public class WeatherData {
 
+    private Context context;
+    private TextView tv;
+
     private List<TimeSlot> timeSlots;
     private List<Hour> hours;
 
@@ -32,10 +36,9 @@ public class WeatherData {
 
     private int tries = 0; // Keep track of attempted downloads
 
-    private Context context;
-
-    public WeatherData(Context context) {
+    public WeatherData(Context context, TextView tv) {
         this.context = context;
+        this.tv = tv;
     }
 
     public void download() {
@@ -80,11 +83,10 @@ public class WeatherData {
                 }
             }
 
-            Toast.makeText(this.context, "Download finished", Toast.LENGTH_SHORT).show();
+            String temperature = String.valueOf(hours.get(0).getTemperature()) + "\u2103";
+            tv.setText(temperature);
 
             tries = 0;
-
-
         }
 
     }

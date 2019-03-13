@@ -3,6 +3,7 @@ package com.gardeners.spiren;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -19,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gardeners.spiren.weather.ForecastActivity;
 import com.gardeners.spiren.weather.Hour;
 import com.gardeners.spiren.weather.WeatherData;
 import com.google.ar.core.Anchor;
@@ -171,20 +173,16 @@ public class MainActivity extends AppCompatActivity {
         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-= Weather =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
         tvTemperature = findViewById(R.id.tvTemperature);
-        String t = "3\u2103";
-        tvTemperature.setText(t);
-
-        weather = new WeatherData(this);
+        weather = new WeatherData(this, tvTemperature);
         weather.download();
 
         tvTemperature.setOnClickListener((View v) -> {
-            // TODO: Open forecast in fragment or new activity
-            Toast.makeText(this, "Clickity Clack", Toast.LENGTH_SHORT).show();
-
             List<Hour> hours = weather.getHours();
             if (hours.size() > 0) {
-                String temp = String.valueOf(hours.get(0).getTemperature()) + "\u2103";
-                tvTemperature.setText(temp);
+
+                //TODO: Open forecast in fragment
+                startActivity(new Intent(MainActivity.this, ForecastActivity.class));
+
             }
         });
 
