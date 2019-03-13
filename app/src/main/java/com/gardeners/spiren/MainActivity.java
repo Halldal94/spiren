@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +23,8 @@ import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.Node;
+import com.google.ar.sceneform.math.Quaternion;
+import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
@@ -32,14 +35,18 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
+import java.util.concurrent.CompletableFuture;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final double MIN_OPENGL_VERSION = 3.0;
 
     private ArFragment arFragment;
-    private ModelRenderable andyRenderable;
 
+    private ModelRenderable flowerRenderable;
+    private ModelRenderable leafRenderable;
+    private ModelRenderable potRenderable;
+    private ModelRenderable stalkRenderable;
     private ViewRenderable renderrable, statusBarRenderable;
     private ImageView imgView;
     private Plant plant;
@@ -50,6 +57,10 @@ public class MainActivity extends AppCompatActivity {
     private Button grow, bugs, action;
 
     private boolean developerMode = false;
+
+    private PlantView plantView;
+
+    private SeekBar heightSlider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +78,26 @@ public class MainActivity extends AppCompatActivity {
         plant.growTimer();
         //loadData();
 
+        heightSlider = (SeekBar) findViewById(R.id.heightSlider);
+        heightSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (plantView != null) {
+                    plantView.setHeight(progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+        updateInfo();
+
         //Setting up buttons
         waterBtn = (ImageButton) findViewById(R.id.watercanbutton);
         bugSprayBtn = (ImageButton) findViewById(R.id.bugspraybutton);
@@ -74,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
         helpBtn = (ImageButton) findViewById(R.id.helpbutton);
 
-        if (developerMode){
+        if (developerMode) {
             setUpDeveloperEnv();
         }
 
@@ -111,23 +142,6 @@ public class MainActivity extends AppCompatActivity {
                     fertalizer = statusBarView.findViewById(R.id.fertelizer);
                 });
 
-        //AugmentedImageDatabase imageDatabase = new AugmentedImageDatabase(session);
-
-        // When you build a Renderable, Sceneform loads its resources in the background while returning
-        // a CompletableFuture. Call thenAccept(), handle(), or check isDone() before calling get().
-        ModelRenderable.builder()
-                .setSource(this, R.raw.andy)
-                .build()
-                .thenAccept(renderable -> andyRenderable = renderable)
-                .exceptionally(
-                        throwable -> {
-                            Toast toast =
-                                    Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-                            toast.setGravity(Gravity.CENTER, 0, 0);
-                            toast.show();
-                            return null;
-                        });
-
         // Denne tegner status bar PS: husk og ikke opdatere verdier før denne er tegnet
         arFragment.setOnTapArPlaneListener(
                 (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
@@ -145,9 +159,28 @@ public class MainActivity extends AppCompatActivity {
                     updateInfo();
                 });
 
-        /*arFragment.setOnTapArPlaneListener(
+        CompletableFuture<ModelRenderable> flowerFuture = ModelRenderable.builder().setSource(this, R.raw.flower).build();
+        CompletableFuture<ModelRenderable> leafFuture = ModelRenderable.builder().setSource(this, R.raw.leaf).build();
+        CompletableFuture<ModelRenderable> potFuture = ModelRenderable.builder().setSource(this, R.raw.pot).build();
+        CompletableFuture<ModelRenderable> stalkFuture = ModelRenderable.builder().setSource(this, R.raw.stalk).build();
+        CompletableFuture.allOf(flowerFuture, leafFuture, potFuture, stalkFuture)
+                // .thenApply(future -> new ModelRenderable[] { flowerFuture.join(), potFuture.join(), stalkFuture.join() })
+                .thenRun(() -> {
+                    this.flowerRenderable = flowerFuture.join();
+                    this.leafRenderable = leafFuture.join();
+                    this.potRenderable = potFuture.join();
+                    this.stalkRenderable = stalkFuture.join();
+                })
+                .exceptionally(throwable -> {
+                    Toast toast =
+                            Toast.makeText(this, "Unable to load renderable", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    return null;
+                });
+        arFragment.setOnTapArPlaneListener(
                 (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
-                    if (andyRenderable == null) {
+                    if (stalkRenderable == null) {
                         return;
                     }
 
@@ -156,12 +189,26 @@ public class MainActivity extends AppCompatActivity {
                     AnchorNode anchorNode = new AnchorNode(anchor);
                     anchorNode.setParent(arFragment.getArSceneView().getScene());
 
-                    // Create the transformable andy and add it to the anchor.
-                    TransformableNode andy = new TransformableNode(arFragment.getTransformationSystem());
-                    andy.setParent(anchorNode);
-                    andy.setRenderable(andyRenderable);
-                    andy.select();
-                });*/
+                    // Create the transformable pot and add it to the anchor.
+                    TransformableNode pot = new TransformableNode(arFragment.getTransformationSystem());
+                    pot.setLocalPosition(new Vector3(0.0F, 0.25F, 0.0F));
+                    pot.setParent(anchorNode);
+                    pot.setRenderable(potRenderable);
+                    pot.select();
+
+                    Node stalk = new Node();
+                    stalk.setLocalPosition(new Vector3(0.0F, 0.0F, 0.0F));
+                    stalk.setParent(pot);
+                    stalk.setRenderable(stalkRenderable);
+
+                    Node flowerNode = new Node();
+                    flowerNode.setLocalRotation(Quaternion.axisAngle(new Vector3(1.0F, 0.0F, 0.0F), 70.0F));
+                    flowerNode.setParent(pot);
+                    flowerNode.setRenderable(flowerRenderable);
+
+                    plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, 0xDEADBEEFDEADBEEFL);
+                    plantView.setHeight(heightSlider.getProgress());
+                });
     }
 
     private void setUpDeveloperEnv() {
