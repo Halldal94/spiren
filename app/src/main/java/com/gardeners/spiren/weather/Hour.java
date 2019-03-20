@@ -10,13 +10,15 @@ public class Hour implements Serializable {
     private double temperature;
     private double humidity;
     private double precipitation;
+    private String symbol;
 
-    public Hour(Date from, Date to, double temperature, double humidity, double precipitation) {
+    public Hour(Date from, Date to, double temperature, double humidity, double precipitation, String symbol) {
         this.from = from;
         this.to = to;
         this.temperature = temperature;
         this.humidity = humidity;
         this.precipitation = precipitation;
+        this.symbol = symbol;
     }
 
     public Date getFrom() {
@@ -41,7 +43,15 @@ public class Hour implements Serializable {
 
     public String toString() {
         return this.from + "," + this.to + "," + this.temperature + "," +
-                this.humidity + "," + this.precipitation;
+                this.humidity + "," + this.precipitation + "," + this.symbol;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 
 }

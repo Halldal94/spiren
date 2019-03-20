@@ -14,6 +14,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -73,18 +74,48 @@ public class WeatherData {
             // Only collect hourly data, not average over several hours.
             // Run through each timeslot and collect temperature and humidity for each hour.
             // For each timeslot valid from t to t (e.g. 10:00 - 10:00, get precipitation
-            // from next timeslot, which includes precipitation from t-1 to t (e.g. 09:00 - 10:00)
+            // from timeslot indexed 6 ahead, which includes precipitation from t to t+1 (e.g. 10:00 - 11:00)
             for (TimeSlot slot : timeSlots) {
                 if ((slot.getTo().getTime() - slot.getFrom().getTime()) == 0) {
-                    double percipitation = timeSlots.get(timeSlots.indexOf(slot) + 1).getPrecipitation();
-                    Hour h = new Hour(slot.getFrom(), slot.getTo(), slot.getTemperature(),
-                            slot.getHumidity(), percipitation);
-                    hours.add(h);
+
+                    int index = timeSlots.indexOf(slot) + 6;
+
+                    if (index < 300) {
+                        TimeSlot t = timeSlots.get(index);
+                        double precipitation = 0;
+                        String symbol;
+
+                        precipitation = t.getPrecipitation();
+                        symbol = t.getSymbol();
+
+                        Hour h = new Hour(slot.getFrom(), slot.getTo(), slot.getTemperature(),
+                                slot.getHumidity(), precipitation, symbol);
+
+                        hours.add(h);
+
+                    }
+
                 }
+            }
+
+            Calendar rightNow = Calendar.getInstance();
+            int currentHour = rightNow.get(Calendar.HOUR_OF_DAY);
+            int firstHour = hours.get(0).getTo().getHours();
+
+            if (currentHour > firstHour) {
+                hours.remove(0);
             }
 
             String temperature = String.valueOf(hours.get(0).getTemperature()) + "\u2103";
             tv.setText(temperature);
+
+            ArrayList<String> symbols = new ArrayList<>();
+
+            for (Hour h : hours) {
+                if (!symbols.contains(h.getSymbol())) {
+                    symbols.add(h.getSymbol());
+                }
+            }
 
             tries = 0;
         }
@@ -146,6 +177,7 @@ public class WeatherData {
             String temperature = "";
             String humidity = "";
             String precipitation = "";
+            String symbol = "";
 
             int eventType = -1;
 
@@ -174,19 +206,27 @@ public class WeatherData {
                             precipitation = xmlData.getAttributeValue(null, "value");
                         }
 
+                        if (tagName.equals("symbol")) {
+                            symbol = xmlData.getAttributeValue(null, "id");
+                        }
+
                         break;
 
                     case XmlPullParser.END_TAG:
 
+                        String type = "0";
+
                         if (tagName.equals("time")) {
                             if (!temperature.equals("")) {
                                 recordsFound++;
-                                publishProgress(from, to, temperature, humidity);
+                                type = "1";
+                                publishProgress(type, from, to, temperature, humidity);
                                 from = to = temperature = humidity = "";
                             }
                             if (!precipitation.equals("")) {
                                 recordsFound++;
-                                publishProgress(from, to, precipitation);
+                                type = "2";
+                                publishProgress(type, from, to, precipitation, symbol);
                                 from = to = precipitation = "";
                             }
                         }
@@ -207,33 +247,20 @@ public class WeatherData {
         @Override
         protected void onProgressUpdate(String... values) {
 
-            double precipitation = 0.0;
-            double temperature = 0.0;
-            double humidity = 0.0;
-            int type = 0;
+            int type;// = 0;
+            double temperature;// = 0.0;
+            double humidity;//= 0.0;
+            double precipitation;// = 0.0;
+            String symbol;// = "";
 
             SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
             Date from, to;
 
             // Data fetched
             if (values.length > 0) {
-                from = processDate(fmt, values[0]);
-                to = processDate(fmt, values[1]);
-
-                if (values.length == 3) { // Length = 3 [from, to, precipitation]
-                    precipitation = Double.valueOf(values[2]);
-
-                    if (to != null && from != null) {
-                        // Type 2 and 3 both have 3 attributes, but only type 3 is a 6 hour interval
-                        long diff = (to.getTime() - from.getTime()) / 3600000; // Diff in hours
-                        type = diff == 6 ? 3 : 2;
-                    }
-
-                } else if (values.length == 4) { // Length = 4 [from, to, temperature, himidity]
-                    temperature = Double.valueOf(values[2]);
-                    humidity = Double.valueOf(values[3]);
-                    type = 1;
-                }
+                type = Integer.valueOf(values[0]);
+                from = processDate(fmt, values[1]);
+                to = processDate(fmt, values[2]);
             } else { // No data fetched
                 Log.i(TAG, "No data downloaded");
                 return;
@@ -241,11 +268,16 @@ public class WeatherData {
 
             TimeSlot slot = new TimeSlot(type, from, to);
 
-            if (type == 1) {
+            if (type == 1) { // type, from, to, temperature, humidity
+                temperature = Double.valueOf(values[3]);
+                humidity = Double.valueOf(values[4]);
                 slot.setTemperature(temperature);
                 slot.setHumidity(humidity);
-            } else {
+            } else if (type == 2) {  // type, from, to, precipitation, symbol
+                precipitation = Double.valueOf(values[3]);
+                symbol = values[4];
                 slot.setPrecipitation(precipitation);
+                slot.setSymbol(symbol);
             }
 
             timeSlots.add(slot);

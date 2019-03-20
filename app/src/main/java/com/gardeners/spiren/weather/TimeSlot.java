@@ -10,8 +10,10 @@ public class TimeSlot {
     private Double temperature;     // Object type instead of
     private Double humidity;        // primitive type in order
     private Double precipitation;   // to store null values
+    private String symbol;
 
-    // Additional values that can be used
+
+// Additional values that can be used
     /*private Double windDirection;
     private Double windSpeed;
     private Double windGust;
@@ -78,6 +80,14 @@ public class TimeSlot {
 
     public void setPrecipitation(double precipitation) {
         this.precipitation = precipitation;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 
 }
