@@ -25,7 +25,7 @@ public class PlantModel {
         return height;
     }
 
-    public void setHeight(int height) {
+    public void setHeight(int height){
         this.height = height;
     }
 
@@ -33,7 +33,7 @@ public class PlantModel {
         return water;
     }
 
-    public void setWater(int water) {
+    public void setWater(int water){
         this.water = water;
     }
 
