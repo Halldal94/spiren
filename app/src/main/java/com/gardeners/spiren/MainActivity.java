@@ -41,6 +41,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 
@@ -180,8 +181,15 @@ public class MainActivity extends AppCompatActivity {
             List<Hour> hours = weather.getHours();
             if (hours.size() > 0) {
 
-                //TODO: Open forecast in fragment
-                startActivity(new Intent(MainActivity.this, ForecastActivity.class));
+                String[] hourStrings = new String[hours.size()];
+
+                for (int i = 0; i < hours.size(); i++) {
+                    hourStrings[i] = hours.get(i).toString();
+                }
+
+                Intent intent = new Intent(MainActivity.this, ForecastActivity.class);
+                intent.putExtra("hours", hourStrings);
+                startActivity(intent);
 
             }
         });

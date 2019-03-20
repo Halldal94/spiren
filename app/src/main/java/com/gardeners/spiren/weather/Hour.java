@@ -1,8 +1,9 @@
 package com.gardeners.spiren.weather;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Hour {
+public class Hour implements Serializable {
 
     private Date from;
     private Date to;
@@ -36,6 +37,11 @@ public class Hour {
 
     public double getPrecipitation() {
         return precipitation;
+    }
+
+    public String toString() {
+        return this.from + "," + this.to + "," + this.temperature + "," +
+                this.humidity + "," + this.precipitation;
     }
 
 }
