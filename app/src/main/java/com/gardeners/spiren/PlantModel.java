@@ -18,15 +18,15 @@ public class PlantModel {
             new Level(250, 10)
     );
 
-    private int level, length, water, fertilizer, bugs, members;
+    private int level, height, water, fertilizer, bugs, members;
     private Date previousAction;
 
-    public int getLength(){
-        return length;
+    public int getHeight(){
+        return height;
     }
 
-    public void setLength(int length) {
-        this.length = length;
+    public void setHeight(int height) {
+        this.height = height;
     }
 
     public int getWater(){
@@ -96,7 +96,7 @@ public class PlantModel {
     public JSONObject toJson() {
         JSONObject data = new JSONObject();
         try {
-            data.put("length", getLength());
+            data.put("height", getHeight());
             data.put("water", getWater());
             data.put("fertilizer", getFertilizer());
             data.put("bugs", getBugs());
@@ -111,7 +111,7 @@ public class PlantModel {
 
     public void fromJson(JSONObject data){
         try {
-            length = (Integer) data.get("length");
+            height = (Integer) data.get("height");
             water = (Integer) data.get("water");
             fertilizer = (Integer) data.get("fertilizer");
             bugs = (Integer) data.get("bugs");

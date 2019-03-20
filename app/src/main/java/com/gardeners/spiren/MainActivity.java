@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
                     updateInfo();
 
                     plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, statusNode, 0xDEADBEEFDEADBEEFL);
-                    plantView.setHeight(plantModel.getLength());
+                    plantView.setHeight(plantModel.getHeight());
                 });
     }
 
@@ -288,14 +288,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void updateInfo(){
         if(health != null){
-            height.setText(String.valueOf(plantModel.getLength()) + " cm");
+            height.setText(String.valueOf(plantModel.getHeight()) + " cm");
             health.setProgress(plantModel.getHealth());
             water.setProgress(plantModel.getWater());
             fertilizer.setProgress(plantModel.getFertilizer());
             bugCount.setText(plantModel.getBugs() + " Bugs");
         }
         if (plantView != null) {
-            plantView.setHeight(plantModel.getLength());
+            plantView.setHeight(plantModel.getHeight());
         }
     }
 

@@ -65,7 +65,7 @@ public class PlantController {
 
     public void initialize(){
         model.setLevel(1);
-        model.setLength(140);
+        model.setHeight(140);
         model.setWater(0);
         model.setFertilizer(0);
         model.setMembers(1);
@@ -92,11 +92,11 @@ public class PlantController {
             baseGrowth = 8;
             fertilizerMultiplier = 4;
         }
-        int length = model.getLength() + baseGrowth + (fertilizerMultiplier * model.getFertilizer()) / 100;
+        int length = model.getHeight() + baseGrowth + (fertilizerMultiplier * model.getFertilizer()) / 100;
         if(length < MIN_LENGTH){
             length = MIN_LENGTH;
         }
-        model.setLength(length);
+        model.setHeight(length);
         game.updateInfo();
     }
 
