@@ -60,8 +60,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imgView;
     private Plant plant;
     private TextView height, bugCount;
-    private ProgressBar health, water, fertalizer;
-    private ImageButton waterBtn, bugSprayBtn, fertalizeBtn, helpBtn;
+    private ProgressBar health, water, fertilizer;
+    private ImageButton waterBtn, bugSprayBtn, fertilizeBtn, helpBtn;
     private View statusBarView;
     private Button grow, bugs, action;
 
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         //Setting up buttons
         waterBtn = (ImageButton) findViewById(R.id.watercanbutton);
         bugSprayBtn = (ImageButton) findViewById(R.id.bugspraybutton);
-        fertalizeBtn = (ImageButton) findViewById(R.id.fertilizerbutton);
+        fertilizeBtn = (ImageButton) findViewById(R.id.fertilizerbutton);
 
         helpBtn = (ImageButton) findViewById(R.id.helpbutton);
 
@@ -157,10 +157,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        fertalizeBtn.setOnClickListener(new View.OnClickListener() {
+        fertilizeBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 playInteractionSound(fertilizeSnds);
-                plant.fertelizerPlant();
+                plant.fertilizePlant();
                 updateInfo();
             }
         });
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                     bugCount = statusBarView.findViewById(R.id.bug_count);
                     health = statusBarView.findViewById(R.id.health);
                     water = statusBarView.findViewById(R.id.water);
-                    fertalizer = statusBarView.findViewById(R.id.fertelizer);
+                    fertilizer = statusBarView.findViewById(R.id.fertelizer);
                 });
 
         // Denne tegner status bar PS: husk og ikke opdatere verdier før denne er tegnet
@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(developerMode){
-                    plant.resetPreviusAction();
+                    plant.resetPreviousAction();
                 }
             }
         });
@@ -322,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
             height.setText(String.valueOf(plant.getLength()) + " cm");
             health.setProgress(plant.getHealth());
             water.setProgress(plant.getWater());
-            fertalizer.setProgress(plant.getFertelizer());
+            fertilizer.setProgress(plant.getFertilizer());
             bugCount.setText(plant.getBugs() + " Bugs");
         }
     }
@@ -334,11 +334,11 @@ public class MainActivity extends AppCompatActivity {
             content.put("length", plant.getLength());
             content.put("health", plant.getHealth());
             content.put("water", plant.getWater());
-            content.put("fertelizer", plant.getFertelizer());
+            content.put("fertilizer", plant.getFertilizer());
             content.put("bugs", plant.getBugs());
             content.put("members", plant.getMembers());
             content.put("level", plant.getLevel());
-            content.put("previus", plant.getPrevius().toString());
+            content.put("previous", plant.getPrevious().toString());
             try {
                 FileOutputStream outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
                 outputStream.write(content.toString().getBytes());

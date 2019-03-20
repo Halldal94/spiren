@@ -4,9 +4,6 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-import java.io.File;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -20,10 +17,10 @@ public class Plant {
 
     private MainActivity game;
 
-    private int length, health , water, fertelizer, bugs, members;
+    private int length, health , water, fertilizer, bugs, members;
     private int level, maxHealth, maxWater, maxBugs;
     private static List<Integer> playerSum;
-    private Date previusAction;
+    private Date previousAction;
 
     public Plant(MainActivity game){
         this.game = game;
@@ -39,7 +36,7 @@ public class Plant {
         this.length = 140;
         this.health = 1;
         this.water = 0;
-        this.fertelizer = 0;
+        this.fertilizer = 0;
         this.members = 1;
         this.level = 1;
 
@@ -77,8 +74,8 @@ public class Plant {
         return water;
     }
 
-    public int getFertelizer(){
-        return fertelizer;
+    public int getFertilizer(){
+        return fertilizer;
     }
 
     public int getBugs(){
@@ -93,27 +90,27 @@ public class Plant {
         return level;
     }
 
-    public Date getPrevius() {
-        return previusAction;
+    public Date getPrevious() {
+        return previousAction;
     }
 
-    public void resetPreviusAction(){
+    public void resetPreviousAction(){
         Log.d("devTest", "reset action");
-        previusAction = new Date(1994, 2, 4);
+        previousAction = new Date(1994, 2, 4);
     }
 
     public void waterPlant(){
-        if(!isSameDay(previusAction, new Date())) {
+        if(!isSameDay(previousAction, new Date())) {
             water += playerSum.get(members - 1);
             calculateHealth();
-            previusAction = new Date();
+            previousAction = new Date();
         }
     }
 
-    public void fertelizerPlant(){
-        if(!isSameDay(previusAction, new Date())) {
-            fertelizer += playerSum.get(members - 1);
-            previusAction = new Date();
+    public void fertilizePlant(){
+        if(!isSameDay(previousAction, new Date())) {
+            fertilizer += playerSum.get(members - 1);
+            previousAction = new Date();
         }
     }
 
@@ -122,10 +119,10 @@ public class Plant {
     }
 
     public void killBugs(){
-        if(!isSameDay(previusAction, new Date())){
+        if(!isSameDay(previousAction, new Date())){
             if (bugs -1 >= 0) {
                 bugs -= 1;
-                previusAction = new Date();
+                previousAction = new Date();
             }
         }
     }
@@ -186,15 +183,15 @@ public class Plant {
         Log.d("devTest", "growing");
         float percent = (maxHealth/health) * 100;
         if (percent < 25){
-            length -= 8 - ((fertelizer / 100) * 4);
+            length -= 8 - ((fertilizer / 100) * 4);
         }else if (percent < 45){
-            length -= 4 - ((fertelizer / 100) * 2);
+            length -= 4 - ((fertilizer / 100) * 2);
         } else if (percent < 55){
             length += 0;
         }else if (percent < 75) {
-            length += 4 + ((fertelizer / 100) * 2);
+            length += 4 + ((fertilizer / 100) * 2);
         } else {
-            length += 8 + ((fertelizer / 100) * 4);
+            length += 8 + ((fertilizer / 100) * 4);
         }
         if(length < 140){
             length = 140;
@@ -214,11 +211,11 @@ public class Plant {
             length = (Integer) data.get("length");
             health = (Integer) data.get("health");
             water = (Integer) data.get("water");
-            fertelizer = (Integer) data.get("fertelizer");
+            fertilizer = (Integer) data.get("fertilizer");
             bugs = (Integer) data.get("bugs");
             members = (Integer) data.get("members");
             level = (Integer) data.get("level");
-            previusAction = (Date) new Date((String) data.get("previus"));
+            previousAction = (Date) new Date((String) data.get("previous"));
         } catch (Exception e) {
             e.printStackTrace();
         }
