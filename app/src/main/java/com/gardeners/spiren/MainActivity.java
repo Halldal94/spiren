@@ -338,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
             content.put("bugs", plant.getBugs());
             content.put("members", plant.getMembers());
             content.put("level", plant.getLevel());
-            content.put("previus", plant.getPrevious().toString());
+            content.put("previous", plant.getPrevious().toString());
             try {
                 FileOutputStream outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
                 outputStream.write(content.toString().getBytes());

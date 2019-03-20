@@ -215,7 +215,7 @@ public class Plant {
             bugs = (Integer) data.get("bugs");
             members = (Integer) data.get("members");
             level = (Integer) data.get("level");
-            previousAction = (Date) new Date((String) data.get("previus"));
+            previousAction = (Date) new Date((String) data.get("previous"));
         } catch (Exception e) {
             e.printStackTrace();
         }
