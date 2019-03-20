@@ -13,4 +13,7 @@
         completions."
     </string>
     <string name="degrees">\u2103</string>
+    <string name="forecast_time">Tid</string>
+    <string name="forecast_temperature">Temperatur</string>
+    <string name="forecast_precipitation">Nedbør</string>
 </resources>

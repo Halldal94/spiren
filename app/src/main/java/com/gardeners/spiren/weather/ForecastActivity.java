@@ -5,6 +5,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
+
 import com.gardeners.spiren.R;
 
 import java.text.ParseException;
@@ -41,6 +45,39 @@ public class ForecastActivity extends AppCompatActivity {
         }
 
         Log.i("i", "i");
+
+
+        TableLayout tableForecast = (TableLayout)findViewById(R.id.tableForecast);
+        tableForecast.setStretchAllColumns(true);
+        tableForecast.bringToFront();
+
+        TableRow trHeader = new TableRow(this);
+        TextView tvTime = new TextView(this);
+        tvTime.setText(R.string.forecast_time);
+        TextView tvTemp = new TextView(this);
+        tvTemp.setText(R.string.forecast_temperature);
+        TextView tvPrecipitation = new TextView(this);
+        tvPrecipitation.setText(R.string.forecast_precipitation);
+        trHeader.addView(tvTime);
+        trHeader.addView(tvTemp);
+        trHeader.addView(tvPrecipitation);
+        tableForecast.addView(trHeader);
+
+        for(int i = 0; i < hours.size(); i++){
+            TableRow tr =  new TableRow(this);
+            TextView c1 = new TextView(this);
+            c1.setText(String.valueOf(hours.get(i).getTo().getHours()));
+            TextView c2 = new TextView(this);
+            String temperature = String.valueOf(hours.get(i).getTemperature() + "\u2103");
+            c2.setText(temperature);
+            TextView c3 = new TextView(this);
+            String precipitation = String.valueOf(hours.get(i).getPrecipitation()) + " mm";
+            c3.setText(precipitation);
+            tr.addView(c1);
+            tr.addView(c2);
+            tr.addView(c3);
+            tableForecast.addView(tr);
+        }
 
 
     }
