@@ -3,6 +3,9 @@ package com.gardeners.spiren;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -35,6 +38,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
     private static final double MIN_OPENGL_VERSION = 3.0;
 
     private ArFragment arFragment;
+
+    private SoundPool soundPool;
+
+    private Random sndRandom = new Random();
+    private int[] waterSnds, bugSpraySnds, fertilizeSnds;
 
     private ModelRenderable flowerRenderable;
     private ModelRenderable leafRenderable;
@@ -72,6 +81,29 @@ public class MainActivity extends AppCompatActivity {
         //Setting up AR view
         setContentView(R.layout.activity_main);
         arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
+
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        soundPool = new SoundPool.Builder()
+                .setMaxStreams(3)
+                .setAudioAttributes(audioAttributes)
+                .build();
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        waterSnds = new int[] {
+                soundPool.load(this, R.raw.water_1, 1),
+                soundPool.load(this, R.raw.water_2, 1)
+        };
+        bugSpraySnds = new int[] {
+                soundPool.load(this, R.raw.spray_1, 1)
+        };
+        fertilizeSnds = new int[] {
+                soundPool.load(this, R.raw.fertilize_1, 1),
+                soundPool.load(this, R.raw.fertilize_2, 1)
+        };
 
         //Setting up text and progress bars
         plant = new Plant(this);
@@ -111,13 +143,23 @@ public class MainActivity extends AppCompatActivity {
 
         waterBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                playInteractionSound(waterSnds);
                 plant.waterPlant();
+                updateInfo();
+            }
+        });
+
+        bugSprayBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                playInteractionSound(bugSpraySnds);
+                plant.killBugs();
                 updateInfo();
             }
         });
 
         fertalizeBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                playInteractionSound(fertilizeSnds);
                 plant.fertelizerPlant();
                 updateInfo();
             }
@@ -211,6 +253,11 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    private void playInteractionSound(int[] snds) {
+        int snd = snds[sndRandom.nextInt(snds.length)];
+        soundPool.play(snd, 1.0F, 1.0F, 1, 0, 1.0F);
+    }
+
     private void setUpDeveloperEnv() {
         grow = (Button) findViewById(R.id.grow);
         bugs = (Button) findViewById(R.id.bugs);
@@ -253,6 +300,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         saveData();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        soundPool.release();
     }
 
     /**
