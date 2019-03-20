@@ -16,14 +16,16 @@ public class PlantView {
     private final Node root;
     private final Node stalk;
     private final Node flower;
+    private final Node status;
     private final List<Node> leaves;
     private final long seed;
 
-    public PlantView(ModelRenderable leafRenderable, Node root, Node stalk, Node flower, long seed) {
+    public PlantView(ModelRenderable leafRenderable, Node root, Node stalk, Node flower, Node status, long seed) {
         this.leafRenderable = leafRenderable;
         this.root = root;
         this.stalk = stalk;
         this.flower = flower;
+        this.status = status;
         this.leaves = new ArrayList<>();
         this.seed = seed;
     }
@@ -36,6 +38,7 @@ public class PlantView {
         stalk.setLocalScale(new Vector3(stalkThickness, stalkHeight, stalkThickness));
         flower.setLocalPosition(new Vector3(0.0F, stalkHeight, 0.0F));
         flower.setLocalScale(new Vector3(flowerSize, flowerSize, flowerSize));
+        status.setLocalPosition(new Vector3(0.35F, height / 200.0F, 0.0f));
 
         int numLeaves = Math.max(0, (height - 10) / leafSparsity);
 

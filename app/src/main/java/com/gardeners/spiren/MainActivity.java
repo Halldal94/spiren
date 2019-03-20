@@ -142,23 +142,6 @@ public class MainActivity extends AppCompatActivity {
                     fertalizer = statusBarView.findViewById(R.id.fertelizer);
                 });
 
-        // Denne tegner status bar PS: husk og ikke opdatere verdier før denne er tegnet
-        arFragment.setOnTapArPlaneListener(
-                (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
-                    if (statusBarRenderable == null) {
-                        return;
-                    }
-
-                    Anchor anchor = hitResult.createAnchor();
-                    AnchorNode anchorNode = new AnchorNode(anchor);
-                    anchorNode.setParent(arFragment.getArSceneView().getScene());
-
-                    Node statusBar = new Node();
-                    statusBar.setParent(anchorNode);
-                    statusBar.setRenderable(statusBarRenderable);
-                    updateInfo();
-                });
-
         CompletableFuture<ModelRenderable> flowerFuture = ModelRenderable.builder().setSource(this, R.raw.flower).build();
         CompletableFuture<ModelRenderable> leafFuture = ModelRenderable.builder().setSource(this, R.raw.leaf).build();
         CompletableFuture<ModelRenderable> potFuture = ModelRenderable.builder().setSource(this, R.raw.pot).build();
@@ -206,7 +189,15 @@ public class MainActivity extends AppCompatActivity {
                     flowerNode.setParent(pot);
                     flowerNode.setRenderable(flowerRenderable);
 
-                    plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, 0xDEADBEEFDEADBEEFL);
+                    Node statusNode = new Node();
+                    statusNode.setLocalPosition(new Vector3(0.0F, 0.0F, 0.0F));
+                    statusNode.setLocalScale(new Vector3(0.7F, 0.7F, 0.7F));
+                    statusNode.setParent(pot);
+                    statusNode.setRenderable(statusBarRenderable);
+
+                    updateInfo();
+
+                    plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, statusNode, 0xDEADBEEFDEADBEEFL);
                     plantView.setHeight(heightSlider.getProgress());
                 });
     }
