@@ -33,10 +33,13 @@ import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -58,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
     private ModelRenderable stalkRenderable;
     private ViewRenderable renderrable, statusBarRenderable;
     private ImageView imgView;
-    private Plant plant;
     private TextView height, bugCount;
     private ProgressBar health, water, fertilizer;
     private ImageButton waterBtn, bugSprayBtn, fertilizeBtn, helpBtn;
@@ -67,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean developerMode = false;
 
+    private PlantModel plantModel;
+    private PlantController plantController;
     private PlantView plantView;
 
     private SeekBar heightSlider;
@@ -105,9 +109,10 @@ public class MainActivity extends AppCompatActivity {
                 soundPool.load(this, R.raw.fertilize_2, 1)
         };
 
-        //Setting up text and progress bars
-        plant = new Plant(this);
-        plant.growTimer();
+        plantModel = new PlantModel();
+        plantController = new PlantController(plantModel, this);
+        plantController.initialize();
+        plantController.growTimer();
         //loadData();
 
         heightSlider = (SeekBar) findViewById(R.id.heightSlider);
@@ -141,34 +146,26 @@ public class MainActivity extends AppCompatActivity {
             setUpDeveloperEnv();
         }
 
-        waterBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                playInteractionSound(waterSnds);
-                plant.waterPlant();
-                updateInfo();
-            }
+        waterBtn.setOnClickListener(v -> {
+            playInteractionSound(waterSnds);
+            plantController.water();
+            updateInfo();
         });
 
-        bugSprayBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                playInteractionSound(bugSpraySnds);
-                plant.killBugs();
-                updateInfo();
-            }
+        bugSprayBtn.setOnClickListener(v -> {
+            playInteractionSound(bugSpraySnds);
+            plantController.killBugs();
+            updateInfo();
         });
 
-        fertilizeBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                playInteractionSound(fertilizeSnds);
-                plant.fertilizePlant();
-                updateInfo();
-            }
+        fertilizeBtn.setOnClickListener(v -> {
+            playInteractionSound(fertilizeSnds);
+            plantController.fertilize();
+            updateInfo();
         });
 
-        helpBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                //TODO
-            }
+        helpBtn.setOnClickListener(v -> {
+            //TODO
         });
 
         ViewRenderable.builder()
@@ -258,31 +255,22 @@ public class MainActivity extends AppCompatActivity {
         bugs.setVisibility(View.VISIBLE);
         action.setVisibility(View.VISIBLE);
 
-        grow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(developerMode){
-                    plant.grow();
-                }
+        grow.setOnClickListener(v -> {
+            if(developerMode){
+                plantController.grow();
             }
         });
 
-        bugs.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(developerMode){
-                    plant.bugSpawnerDev();
-                    updateInfo();
-                }
+        bugs.setOnClickListener(v -> {
+            if(developerMode){
+                plantController.bugSpawnerDev();
+                updateInfo();
             }
         });
 
-        action.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(developerMode){
-                    plant.resetPreviousAction();
-                }
+        action.setOnClickListener(v -> {
+            if(developerMode){
+                plantController.resetPreviousAction();
             }
         });
     }
@@ -299,45 +287,24 @@ public class MainActivity extends AppCompatActivity {
         soundPool.release();
     }
 
-    /**
-     * Returns false and displays an error message if Sceneform can not run, true if Sceneform can run
-     * on this device.
-     *
-     * <p>Sceneform requires Android N on the device as well as OpenGL 3.0 capabilities.
-     *
-     * <p>Finishes the activity if Sceneform can not run
-     */
-
     public void updateInfo(){
         if(health != null){
-            height.setText(String.valueOf(plant.getLength()) + " cm");
-            health.setProgress(plant.getHealth());
-            water.setProgress(plant.getWater());
-            fertilizer.setProgress(plant.getFertilizer());
-            bugCount.setText(plant.getBugs() + " Bugs");
+            height.setText(String.valueOf(plantModel.getLength()) + " cm");
+            health.setProgress(plantModel.getHealth());
+            water.setProgress(plantModel.getWater());
+            fertilizer.setProgress(plantModel.getFertilizer());
+            bugCount.setText(plantModel.getBugs() + " Bugs");
         }
     }
 
     private void saveData(){
         String filename = "save";
-        JSONObject content = new JSONObject();
+        JSONObject data = plantModel.toJson();
         try {
-            content.put("length", plant.getLength());
-            content.put("health", plant.getHealth());
-            content.put("water", plant.getWater());
-            content.put("fertilizer", plant.getFertilizer());
-            content.put("bugs", plant.getBugs());
-            content.put("members", plant.getMembers());
-            content.put("level", plant.getLevel());
-            content.put("previous", plant.getPrevious().toString());
-            try {
-                FileOutputStream outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-                outputStream.write(content.toString().getBytes());
-                outputStream.close();
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        } catch (Exception e) {
+            FileOutputStream outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(data.toString().getBytes(Charset.forName("UTF-8")));
+            outputStream.close();
+        } catch (IOException e){
             e.printStackTrace();
         }
     }
@@ -346,18 +313,28 @@ public class MainActivity extends AppCompatActivity {
         String filename = "save";
         File directory = this.getFilesDir();
         File file = new File(directory, filename);
-        if(file != null || file.exists()) {
+        if(file.exists()) {
             try {
                 byte[] encoded = Files.readAllBytes(file.toPath());
-                JSONObject load = new JSONObject(new String(encoded));
-                plant.loadData(load);
-            } catch (Exception e) {
+                JSONObject data = new JSONObject(new String(encoded, Charset.forName("UTF-8")));
+                plantModel.fromJson(data);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
     }
 
 
+    /**
+     * Returns false and displays an error message if Sceneform can not run, true if Sceneform can run
+     * on this device.
+     *
+     * <p>Sceneform requires Android N on the device as well as OpenGL 3.0 capabilities.
+     *
+     * <p>Finishes the activity if Sceneform can not run
+     */
     public static boolean checkIsSupportedDeviceOrFinish(final Activity activity) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             Log.e(TAG, "Sceneform requires Android N or later");
