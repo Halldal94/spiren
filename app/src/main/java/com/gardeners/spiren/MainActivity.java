@@ -117,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         plantController.initialize();
         plantController.growTimer();
 
+        loadData();
         updateInfo();
 
         //Setting up buttons
