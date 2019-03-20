@@ -13,7 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 public class PlantController {
     private static final Random bugsRandom = new Random();
-    private static final int MIN_LENGTH = 140;
+    private static final int MIN_LENGTH = 15;
+    private static final int MAX_LENGTH = 120;
     private static final List<Integer> playerSum = Arrays.asList(40, 23, 14, 13, 10, 9, 8, 7, 6, 6, 5, 5);
 
     private final PlantModel model;
@@ -65,7 +66,7 @@ public class PlantController {
 
     public void initialize(){
         model.setLevel(1);
-        model.setHeight(140);
+        model.setHeight(15);
         model.setWater(0);
         model.setFertilizer(0);
         model.setMembers(1);
@@ -77,30 +78,33 @@ public class PlantController {
         int baseGrowth;
         int fertilizerMultiplier;
         if (healthPercent < 25){
-            baseGrowth = -8;
-            fertilizerMultiplier = 4;
+            baseGrowth = -6;
+            fertilizerMultiplier = 3;
         } else if (healthPercent < 45){
-            baseGrowth = -4;
+            baseGrowth = -3;
             fertilizerMultiplier = 2;
         } else if (healthPercent < 55){
             baseGrowth = 0;
             fertilizerMultiplier = 0;
         } else if (healthPercent < 75) {
-            baseGrowth = 4;
+            baseGrowth = 3;
             fertilizerMultiplier = 2;
         } else {
-            baseGrowth = 8;
-            fertilizerMultiplier = 4;
+            baseGrowth = 6;
+            fertilizerMultiplier = 3;
         }
         int length = model.getHeight() + baseGrowth + (fertilizerMultiplier * model.getFertilizer()) / 100;
-        if(length < MIN_LENGTH){
+        if(length < MIN_LENGTH) {
             length = MIN_LENGTH;
+        }
+        if (length > MAX_LENGTH) {
+            length = MAX_LENGTH;
         }
         model.setHeight(length);
         game.updateInfo();
     }
 
-    public void water(){
+    public void water() {
         Date now = new Date();
         if(!isSameDay(model.getPreviousAction(), now)) {
             model.setWater(model.getWater() + playerSum.get(model.getMembers() - 1));
@@ -108,7 +112,7 @@ public class PlantController {
         }
     }
 
-    public void fertilize(){
+    public void fertilize() {
         Date now = new Date();
         if(!isSameDay(model.getPreviousAction(), now)) {
             model.setFertilizer(model.getFertilizer() + playerSum.get(model.getMembers() - 1));

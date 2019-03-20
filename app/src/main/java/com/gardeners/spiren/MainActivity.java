@@ -41,6 +41,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
@@ -74,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
     private PlantView plantView;
 
     private SeekBar heightSlider;
+
+    private long timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,24 +117,6 @@ public class MainActivity extends AppCompatActivity {
         plantController.initialize();
         plantController.growTimer();
 
-        heightSlider = (SeekBar) findViewById(R.id.heightSlider);
-        heightSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (plantView != null) {
-                    plantView.setHeight(progress);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
         updateInfo();
 
         //Setting up buttons
@@ -165,6 +150,22 @@ public class MainActivity extends AppCompatActivity {
 
         helpBtn.setOnClickListener(v -> {
             //TODO
+        });
+
+        helpBtn.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    timer = new Date().getTime();
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (new Date().getTime() - timer > 3000){
+                        developerMode = !developerMode;
+                        setUpDeveloperEnv();
+                    }
+                    Log.d("time", Long.toString(new Date().getTime() - timer));
+                }
+                return false;
+            }
         });
 
         ViewRenderable.builder()
@@ -246,32 +247,61 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpDeveloperEnv() {
-        grow = (Button) findViewById(R.id.grow);
-        bugs = (Button) findViewById(R.id.bugs);
-        action = (Button) findViewById(R.id.action);
+        if(developerMode) {
+            grow = (Button) findViewById(R.id.grow);
+            bugs = (Button) findViewById(R.id.bugs);
+            action = (Button) findViewById(R.id.action);
+            heightSlider = (SeekBar) findViewById(R.id.heightSlider);
 
-        grow.setVisibility(View.VISIBLE);
-        bugs.setVisibility(View.VISIBLE);
-        action.setVisibility(View.VISIBLE);
+            grow.setVisibility(View.VISIBLE);
+            bugs.setVisibility(View.VISIBLE);
+            action.setVisibility(View.VISIBLE);
+            heightSlider.setVisibility(View.VISIBLE);
 
-        grow.setOnClickListener(v -> {
-            if(developerMode){
-                plantController.grow();
-            }
-        });
 
-        bugs.setOnClickListener(v -> {
-            if(developerMode){
-                plantController.bugSpawnerDev();
-                updateInfo();
-            }
-        });
+            heightSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (plantView != null) {
+                        plantView.setHeight(progress);
+                        plantModel.setHeight(progress);
+                        updateInfo();
+                    }
+                }
 
-        action.setOnClickListener(v -> {
-            if(developerMode){
-                plantController.resetPreviousAction();
-            }
-        });
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
+            });
+
+            grow.setOnClickListener(v -> {
+                if(developerMode){
+                    plantController.grow();
+                }
+            });
+
+            bugs.setOnClickListener(v -> {
+                if(developerMode){
+                    plantController.bugSpawnerDev();
+                    updateInfo();
+                }
+            });
+
+            action.setOnClickListener(v -> {
+                if(developerMode){
+                    plantController.resetPreviousAction();
+                }
+            });
+        } else if (findViewById(R.id.grow).getVisibility() == View.VISIBLE){
+            grow.setVisibility(View.INVISIBLE);
+            bugs.setVisibility(View.INVISIBLE);
+            action.setVisibility(View.INVISIBLE);
+            heightSlider.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
