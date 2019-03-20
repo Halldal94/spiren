@@ -113,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
         plantController = new PlantController(plantModel, this);
         plantController.initialize();
         plantController.growTimer();
-        //loadData();
 
         heightSlider = (SeekBar) findViewById(R.id.heightSlider);
         heightSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -237,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
                     updateInfo();
 
                     plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, statusNode, 0xDEADBEEFDEADBEEFL);
-                    plantView.setHeight(heightSlider.getProgress());
+                    plantView.setHeight(plantModel.getLength());
                 });
     }
 
@@ -294,6 +293,9 @@ public class MainActivity extends AppCompatActivity {
             water.setProgress(plantModel.getWater());
             fertilizer.setProgress(plantModel.getFertilizer());
             bugCount.setText(plantModel.getBugs() + " Bugs");
+        }
+        if (plantView != null) {
+            plantView.setHeight(plantModel.getLength());
         }
     }
 
