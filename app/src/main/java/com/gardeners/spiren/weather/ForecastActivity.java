@@ -2,16 +2,21 @@ package com.gardeners.spiren.weather;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.gardeners.spiren.R;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -51,99 +56,98 @@ public class ForecastActivity extends AppCompatActivity {
         tableForecast.setStretchAllColumns(true);
         tableForecast.bringToFront();
 
-        int headerTextSize = 25;
+        Point size = new Point();
+        getWindowManager().getDefaultDisplay().getSize(size);
+        float ratio = (float) (110 / (size.x * 0.1));
 
-        TableRow trHeader = new TableRow(this);
-        trHeader.setPadding(0,30,0,50);
-        trHeader.setBackgroundColor(Color.rgb(227, 242, 255));
-
-        TextView tvTime = new TextView(this);
-        tvTime.setText(R.string.forecast_time);
-        tvTime.setTextSize(headerTextSize);
-        tvTime.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        tvTime.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
-
-        TextView tvTemp = new TextView(this);
-        tvTemp.setText(R.string.forecast_temperature);
-        tvTemp.setTextSize(headerTextSize);
-        tvTemp.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        tvTemp.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
-
-        TextView tvPrecipitation = new TextView(this);
-        tvPrecipitation.setText(R.string.forecast_precipitation);
-        tvPrecipitation.setTextSize(headerTextSize);
-        tvPrecipitation.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        tvPrecipitation.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
-
-        trHeader.addView(tvTime);
-        trHeader.addView(tvTemp);
-        trHeader.addView(tvPrecipitation);
-        tableForecast.addView(trHeader);
-
-
-        int rowTextSize = 25;
         for(int i = 0; i < hours.size(); i++){
-            TableRow tr =  new TableRow(this);
-            tr.setPadding(10, 40, 10, 40);
+            TableRow row =  new TableRow(this);
+            row.setPadding(10, 40, 10, 40);
 
-            int color = i % 2 == 0 ? Color.WHITE : Color.rgb(245, 245, 245);
-
-            /*TextView symbol = new TextView(this);
-            symbol.setText(String.valueOf(getSymbol(hours.get(i).getSymbol())));
-            symbol.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            symbol.setBackgroundColor(color);
-            symbol.setPadding(10, 40, 10, 40);
-            */
+            int color = i % 2 == 0 ? Color.WHITE : Color.rgb(240, 250, 255);
 
             // Time
-            TextView c1 = new TextView(this);
-            int time = hours.get(i).getTo().getHours();
-            String t = time > 9 ? time + ":00" : "0" + time + ":00";
-            c1.setText(t);
-            c1.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            c1.setTextSize(rowTextSize);
-            c1.setBackgroundColor(color);
-            c1.setPadding(10, 40, 10, 40);
+            LinearLayout l = new LinearLayout(this);
+            l.setOrientation(LinearLayout.VERTICAL);
+            TextView tvDay = new TextView(this);
+            String day = dayOfWeek(hours.get(i).getTo().getDay());
+            tvDay.setText(day);
+            tvDay.setTextSize(15);
+            tvDay.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            int hour = hours.get(i).getTo().getHours();
+            String time = hour > 9 ? hour + ":00" : "0" + hour + ":00";
+            TextView tvTime = getTv(time, color);
+            tvTime.setPadding(0,0,0,0);
+            l.addView(tvDay);
+            l.addView(tvTime);
+            l.setPadding(0, 20, 0, 30);
+            row.addView(l);
+
+            // Symbol
+            ImageView view = new ImageView(this);
+            //view.setImageResource(getSymbol(hours.get(i).getSymbol()));
+            view.setScaleY(ratio);
+            view.setScaleX(ratio);
+            view.setBackgroundColor(color);
+            row.addView(view);
 
             // Temperature
-            TextView c2 = new TextView(this);
             String temperature = String.valueOf(hours.get(i).getTemperature() + "\u2103");
-            c2.setText(temperature);
-            c2.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            c2.setTextSize(rowTextSize);
-            c2.setBackgroundColor(color);
-            c2.setPadding(10, 40, 10, 40);
+            TextView tvTemperature = getTv(temperature, color);
+            row.addView(tvTemperature);
 
             // Precipitation
-            TextView c3 = new TextView(this);
             String precipitation = String.valueOf(hours.get(i).getPrecipitation()) + " mm";
-            c3.setText(precipitation);
-            c3.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            c3.setTextSize(rowTextSize);
-            c3.setBackgroundColor(color);
-            c3.setPadding(10, 40, 10, 40);
-
-            //tr.addView(symbol);
-            tr.addView(c1);
-            tr.addView(c2);
-            tr.addView(c3);
-            tableForecast.addView(tr);
+            TextView tvPrecipitation = getTv(precipitation, color);
+            row.addView(tvPrecipitation);
 
             TableRow trBlank = new TableRow(this);
-            tr.setBackgroundColor(Color.LTGRAY);
-            tr.setPadding(0,5,0,0);
+            //row.setBackgroundColor(Color.LTGRAY);
+            row.setBackgroundColor(color);
+            row.setPadding(0,5,0,0);
+
+            tableForecast.addView(row);
             tableForecast.addView(trBlank);
+
         }
+    }
+
+    public TextView getTv(String text, int color) {
+        TextView tv = new TextView(this);
+        tv.setText(text);
+        tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        tv.setTextSize(25);
+        tv.setBackgroundColor(color);
+        tv.setPadding(10, 50, 10, 40);
+        return tv;
     }
 
 
     public int getSymbol(String symbol) {
         switch (symbol) {
-            case "Cloud": return 1;
-            case "LightRain": return 2;
-            case "Drizzle": return 3;
-            case "Rain": return 4;
-            default: return 5;
+            /*case "Sun":
+            case "SleetSun":
+            case "LightSleetSun":*/
+
+            case "Cloud": return 0;
+            /*case "PartlyCloud":
+            case "LightCloud":
+
+            case "Rain":
+            case "LightRain":
+            case "Drizzle":
+
+            case "LightRainSun":
+            case "DrizzleSun":
+
+            case "Snow":
+            case "LightSnow":
+
+            case "Sleet":
+            case "HeavySleet":
+            case "LightSleet":*/
+            default: return 0;
+
         }
     }
 
@@ -187,6 +191,19 @@ public class ForecastActivity extends AppCompatActivity {
             case "Nov": return "11";
             case "Dec": return "12";
             default: return "00";
+        }
+    }
+
+    private String dayOfWeek(int day) {
+        switch (day) {
+            case 0: return "Søndag";
+            case 1: return "Mandag";
+            case 2: return "Tirsdag";
+            case 3: return "Onsdag";
+            case 4: return "Torsdag";
+            case 5: return "Fredag";
+            case 6: return "Lørdag";
+            default: return "";
         }
     }
 

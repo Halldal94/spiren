@@ -74,7 +74,11 @@ public class WeatherData {
             // Only collect hourly data, not average over several hours.
             // Run through each timeslot and collect temperature and humidity for each hour.
             // For each timeslot valid from t to t (e.g. 10:00 - 10:00, get precipitation
-            // from timeslot indexed 6 ahead, which includes precipitation from t to t+1 (e.g. 10:00 - 11:00)
+            // from timeslot indexed 6 ahead, which includes precipitation from t to t+1
+            // (e.g. 10:00 - 11:00)
+
+            List<String> symbolList = new ArrayList<>();
+
             for (TimeSlot slot : timeSlots) {
                 if ((slot.getTo().getTime() - slot.getFrom().getTime()) == 0) {
 
@@ -92,11 +96,15 @@ public class WeatherData {
                                 slot.getHumidity(), precipitation, symbol);
 
                         hours.add(h);
-
+                        if (!symbolList.contains(h.getSymbol())) {
+                            symbolList.add(h.getSymbol());
+                        }
                     }
 
                 }
             }
+
+            Log.i("tag", "hello");
 
             Calendar rightNow = Calendar.getInstance();
             int currentHour = rightNow.get(Calendar.HOUR_OF_DAY);
@@ -122,7 +130,6 @@ public class WeatherData {
 
     }
 
-    // Inner class for doing background download
     private class AsyncDownloader extends AsyncTask<Object, String, Integer> {
 
         @Override

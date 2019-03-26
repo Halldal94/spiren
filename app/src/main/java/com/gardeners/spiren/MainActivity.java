@@ -74,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
 
     // Weather data
     private WeatherData weather;
-    private TextView tvTemperature;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-= Weather =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-        tvTemperature = findViewById(R.id.tvTemperature);
+        TextView tvTemperature = findViewById(R.id.tvTemperature);
         weather = new WeatherData(this, tvTemperature);
         weather.download();
 
