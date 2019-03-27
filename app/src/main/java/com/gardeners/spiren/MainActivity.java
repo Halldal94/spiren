@@ -235,11 +235,12 @@ public class MainActivity extends AppCompatActivity {
         helpBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (helpBtn.isChecked()){
+
                     helpText.setVisibility(View.VISIBLE);
                     helpText.setText(
-                                    "Planten din trenger å vokse! \n" +
-                                            "Hold kameraet ditt mot et flatt område og trykk på en av prikkene som dukker opp. \n" +
-                                            "Planten din trenger vann og gjødsel. Skadedyr kan også komme! \n" +
+                                    "Planten din trenger å vokse!\n\n" +
+                                            "Hold kameraet ditt mot et flatt område og trykk på en av prikkene som dukker opp. \n\n" +
+                                            "Planten din trenger vann og gjødsel. Skadedyr kan også komme! \n\n" +
                                             "Konkurrér om å få den høyeste planten!"
                             );
                 } else {
