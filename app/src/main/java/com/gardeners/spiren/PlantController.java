@@ -66,7 +66,7 @@ public class PlantController {
 
     public void initialize(){
         model.setLevel(1);
-        model.setHeight(15);
+        model.setHeight(MIN_LENGTH);
         model.setWater(0);
         model.setFertilizer(0);
         model.setMembers(1);
@@ -102,6 +102,7 @@ public class PlantController {
         }
         model.setHeight(length);
         game.updateInfo();
+        game.onGrow();
     }
 
     public void water() {

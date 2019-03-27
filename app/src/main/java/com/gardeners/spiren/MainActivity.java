@@ -32,6 +32,7 @@ import com.google.ar.core.Anchor;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.sceneform.AnchorNode;
+import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     private SoundPool soundPool;
 
     private Random sndRandom = new Random();
-    private int[] waterSnds, bugSpraySnds, fertilizeSnds;
+    private int[] waterSnds, bugSpraySnds, fertilizeSnds, growSnds;
 
     private ModelRenderable flowerRenderable;
     private ModelRenderable leafRenderable;
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private View statusBarView;
     private Button grow, bugs, action;
 
-    private boolean developerMode = false;
+    private boolean developerMode = true;
 
     private PlantModel plantModel;
     private PlantController plantController;
@@ -107,7 +108,8 @@ public class MainActivity extends AppCompatActivity {
         }
         //Setting up AR view
         setContentView(R.layout.activity_main);
-        arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
+        arFragment = (SpirenArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
+        ((SpirenArFragment) arFragment).setActivity(this);
 
 
 
@@ -132,6 +134,9 @@ public class MainActivity extends AppCompatActivity {
         fertilizeSnds = new int[] {
                 soundPool.load(this, R.raw.fertilize_1, 1),
                 soundPool.load(this, R.raw.fertilize_2, 1)
+        };
+        growSnds = new int[] {
+                soundPool.load(this, R.raw.grow_1, 1)
         };
 
         plantModel = new PlantModel();
@@ -319,8 +324,7 @@ public class MainActivity extends AppCompatActivity {
 
                     updateInfo();
 
-                    plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, statusNode, 0xDEADBEEFDEADBEEFL);
-                    plantView.setHeight(plantModel.getHeight());
+                    plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, statusNode, 0xDEADBEEFDEADBEEFL, plantModel.getHeight());
                 });
 
 
@@ -414,6 +418,10 @@ public class MainActivity extends AppCompatActivity {
         
     }
 
+    public void onGrow() {
+        playInteractionSound(growSnds);
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -436,6 +444,12 @@ public class MainActivity extends AppCompatActivity {
         }
         if (plantView != null) {
             plantView.setHeight(plantModel.getHeight());
+        }
+    }
+
+    public void onUpdate(FrameTime frameTime) {
+        if (plantView != null) {
+            plantView.onUpdate(frameTime);
         }
     }
 
