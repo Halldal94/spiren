@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 public class PlantController {
     private static final Random bugsRandom = new Random();
-    private static final int MIN_LENGTH = 15;
-    private static final int MAX_LENGTH = 120;
+    private static final int MIN_HEIGHT = 15;
+    private static final int MAX_HEIGHT = 120;
     private static final List<Integer> playerSum = Arrays.asList(40, 23, 14, 13, 10, 9, 8, 7, 6, 6, 5, 5);
 
     private final PlantModel model;
@@ -66,7 +66,7 @@ public class PlantController {
 
     public void initialize(){
         model.setLevel(1);
-        model.setHeight(15);
+        model.setHeight(MIN_HEIGHT);
         model.setWater(0);
         model.setFertilizer(0);
         model.setMembers(1);
@@ -93,15 +93,16 @@ public class PlantController {
             baseGrowth = 6;
             fertilizerMultiplier = 3;
         }
-        int length = model.getHeight() + baseGrowth + (fertilizerMultiplier * model.getFertilizer()) / 100;
-        if(length < MIN_LENGTH) {
-            length = MIN_LENGTH;
+        int height = model.getHeight() + baseGrowth + (fertilizerMultiplier * model.getFertilizer()) / 100;
+        if(height < MIN_HEIGHT) {
+            height = MIN_HEIGHT;
         }
-        if (length > MAX_LENGTH) {
-            length = MAX_LENGTH;
+        if (height > MAX_HEIGHT) {
+            height = MAX_HEIGHT;
         }
-        model.setHeight(length);
+        model.setHeight(height);
         game.updateInfo();
+        game.onGrow();
     }
 
     public void water() {

@@ -1,5 +1,6 @@
 package com.gardeners.spiren;
 
+import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
@@ -10,7 +11,8 @@ import java.util.List;
 import java.util.Random;
 
 public class PlantView {
-    private static final int leafSparsity = 4;
+    private static final int LEAF_SPARSITY = 4;
+    private static final float GROWTH_CM_PER_SECOND = 2.0F;
 
     private final ModelRenderable leafRenderable;
     private final Node root;
@@ -20,7 +22,10 @@ public class PlantView {
     private final List<Node> leaves;
     private final long seed;
 
-    public PlantView(ModelRenderable leafRenderable, Node root, Node stalk, Node flower, Node status, long seed) {
+    private float internalHeight;
+    private int targetHeight;
+
+    public PlantView(ModelRenderable leafRenderable, Node root, Node stalk, Node flower, Node status, long seed, int height) {
         this.leafRenderable = leafRenderable;
         this.root = root;
         this.stalk = stalk;
@@ -28,9 +33,30 @@ public class PlantView {
         this.status = status;
         this.leaves = new ArrayList<>();
         this.seed = seed;
+        this.internalHeight = height;
+        this.targetHeight = height;
+        applyHeight(height);
     }
 
     public void setHeight(int height) {
+        this.targetHeight = height;
+    }
+
+    public void onUpdate(FrameTime frameTime) {
+        if (internalHeight == targetHeight) return;
+
+        float remainingGrowth = targetHeight - internalHeight;
+        float growth = Math.signum(remainingGrowth) * GROWTH_CM_PER_SECOND * frameTime.getDeltaSeconds();
+        if (Math.abs(growth) < Math.abs(remainingGrowth)) {
+            internalHeight += growth;
+        } else {
+            internalHeight = targetHeight;
+        }
+
+        applyHeight(internalHeight);
+    }
+
+    private void applyHeight(float height) {
         float stalkHeight = height / 100.0F;
         float stalkThickness = 0.175F + height / 300.0F;
         float flowerSize = 0.25F + height / 150.0F;
@@ -40,13 +66,13 @@ public class PlantView {
         flower.setLocalScale(new Vector3(flowerSize, flowerSize, flowerSize));
         status.setLocalPosition(new Vector3(0.35F, height / 200.0F, 0.0f));
 
-        int numLeaves = Math.max(0, (height - 10) / leafSparsity);
+        int numLeaves = Math.max(0, ((int) height - 10) / LEAF_SPARSITY);
 
         // Add leaves, if any should be added
         for (int i = leaves.size(); i < numLeaves; i++) {
             Node leaf = new Node();
             leaf.setParent(root);
-            leaf.setLocalPosition(new Vector3(0.0F, leafSparsity * (i + 0.5F) / 100.0F, 0.0F));
+            leaf.setLocalPosition(new Vector3(0.0F, LEAF_SPARSITY * (i + 0.5F) / 100.0F, 0.0F));
             leaf.setRenderable(leafRenderable);
             leaves.add(leaf);
         }
@@ -59,7 +85,7 @@ public class PlantView {
         // Update scale of all leaves
         Random random = new Random(seed);
         for (int i = 0; i < leaves.size(); i++) {
-            int position = i * leafSparsity;
+            int position = i * LEAF_SPARSITY;
             Node leaf = leaves.get(i);
             float scale = 0.5F + (height - position) / 40.0F;
             leaf.setLocalScale(new Vector3(scale, scale, scale));

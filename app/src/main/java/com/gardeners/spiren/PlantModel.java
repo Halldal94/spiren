@@ -102,7 +102,11 @@ public class PlantModel {
             data.put("bugs", getBugs());
             data.put("members", getMembers());
             data.put("level", getLevel());
-            data.put("previousAction", DATE_FORMAT.format(getPreviousAction()));
+            if (getPreviousAction() != null) {
+                data.put("previousAction", DATE_FORMAT.format(getPreviousAction()));
+            } else {
+                data.put("previousAction", JSONObject.NULL);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -117,7 +121,11 @@ public class PlantModel {
             bugs = (Integer) data.get("bugs");
             members = (Integer) data.get("members");
             level = (Integer) data.get("level");
-            previousAction = DATE_FORMAT.parse((String) data.get("previous"));
+            if (data.get("previousAction") != JSONObject.NULL) {
+                previousAction = DATE_FORMAT.parse((String) data.get("previousAction"));
+            } else {
+                previousAction = null;
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (ParseException e) {
