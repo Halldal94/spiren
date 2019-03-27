@@ -49,6 +49,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Calendar;
 import java.util.Dictionary;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -441,10 +442,59 @@ public class MainActivity extends AppCompatActivity {
             water.setProgress(plantModel.getWater());
             fertilizer.setProgress(plantModel.getFertilizer());
             bugCount.setText(plantModel.getBugs() + " Bugs");
+            updateButtons();
         }
         if (plantView != null) {
             plantView.setHeight(plantModel.getHeight());
         }
+    }
+
+    public void updateButtons() {
+        Calendar now = Calendar.getInstance();
+        Calendar then = Calendar.getInstance();
+        now.setTime(Calendar.getInstance().getTime());
+        then.setTime(plantModel.getPreviousAction());
+
+        if (isSameDay(then, now)) {
+            disableButtons();
+        } else {
+            enableButtons();
+        }
+    }
+
+    public static boolean isSameDay(Calendar c1, Calendar c2){
+        if(c1 != null && c2 != null){
+            return c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR) && c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR);
+        }
+        return false;
+    }
+
+    public void disableButtons() {
+        waterBtn.setImageResource(R.drawable.watercan_disabled);
+        waterBtn.setClickable(false);
+        waterBtn.setEnabled(false);
+
+        bugSprayBtn.setImageResource(R.drawable.bugspray_disabled);
+        bugSprayBtn.setClickable(false);
+        bugSprayBtn.setEnabled(false);
+
+        fertilizeBtn.setImageResource(R.drawable.fertilizer_disabled);
+        fertilizeBtn.setClickable(false);
+        fertilizeBtn.setEnabled(false);
+    }
+
+    public void enableButtons() {
+        waterBtn.setImageResource(R.drawable.watercan);
+        waterBtn.setClickable(true);
+        waterBtn.setEnabled(true);
+
+        bugSprayBtn.setImageResource(R.drawable.bugspray);
+        bugSprayBtn.setClickable(true);
+        bugSprayBtn.setEnabled(true);
+
+        fertilizeBtn.setImageResource(R.drawable.fertilizer);
+        fertilizeBtn.setClickable(true);
+        fertilizeBtn.setEnabled(true);
     }
 
     public void onUpdate(FrameTime frameTime) {
