@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
@@ -70,13 +71,13 @@ public class MainActivity extends AppCompatActivity {
 
     private Random sndRandom = new Random();
     private int[] waterSnds, bugSpraySnds, fertilizeSnds, growSnds;
+    private MediaPlayer musicPlayer;
 
     private ModelRenderable flowerRenderable;
     private ModelRenderable leafRenderable;
     private ModelRenderable potRenderable;
     private ModelRenderable stalkRenderable;
-    private ViewRenderable renderrable, statusBarRenderable;
-    private ImageView imgView;
+    private ViewRenderable statusBarRenderable;
     private TextView height, bugCount;
     private ProgressBar health, water, fertilizer;
     private ImageButton waterBtn, bugSprayBtn, fertilizeBtn;
@@ -111,8 +112,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         arFragment = (SpirenArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
         ((SpirenArFragment) arFragment).setActivity(this);
-
-
 
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
@@ -163,89 +162,69 @@ public class MainActivity extends AppCompatActivity {
         fertilizeBtn.setEnabled(true);
         fertilizeBtn.setPressed(true);
 
-        bugSprayBtn.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v){
-                playInteractionSound(bugSpraySnds);
-                plantController.killBugs();
-                updateInfo();
+        bugSprayBtn.setOnClickListener(v -> {
+            playInteractionSound(bugSpraySnds);
+            plantController.killBugs();
+            updateInfo();
 
-                Timer buttonTimer = new Timer();
-                buttonTimer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                bugSprayBtn.setEnabled(true);
-                                bugSprayBtn.setPressed(true);
-                            }
-                        });
-                    }
-                }, 1000);
-            }
-        });
-
-        waterBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                playInteractionSound(waterSnds);
-                plantController.water();
-                updateInfo();
-
-
-                Timer buttonTimer = new Timer();
-                buttonTimer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                waterBtn.setEnabled(true);
-                                waterBtn.setPressed(true);
-                            }
-                        });
-                    }
-                }, 1000);
-            }
-        });
-
-        fertilizeBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                playInteractionSound(fertilizeSnds);
-                plantController.fertilize();
-                updateInfo();
-
-                Timer buttonTimer = new Timer();
-                buttonTimer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                fertilizeBtn.setEnabled(true);
-                                fertilizeBtn.setPressed(true);
-                            }
-                        });
-                    }
-                }, 1000);
-            }
-        });
-
-        helpBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (helpBtn.isChecked()){
-                    helpText.setVisibility(View.VISIBLE);
-                    helpText.setText(
-                                    "Planten din trenger å vokse! \n" +
-                                            "Hold kameraet ditt mot et flatt område og trykk på en av prikkene som dukker opp. \n" +
-                                            "Planten din trenger vann og gjødsel. Skadedyr kan også komme! \n" +
-                                            "Konkurrér om å få den høyeste planten!"
-                            );
-                } else {
-                    helpText.setVisibility(View.INVISIBLE);
+            Timer buttonTimer = new Timer();
+            buttonTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    runOnUiThread(() -> {
+                        bugSprayBtn.setEnabled(true);
+                        bugSprayBtn.setPressed(true);
+                    });
                 }
+            }, 1000);
+        });
+
+        waterBtn.setOnClickListener(v -> {
+            playInteractionSound(waterSnds);
+            plantController.water();
+            updateInfo();
+
+
+            Timer buttonTimer = new Timer();
+            buttonTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    runOnUiThread(() -> {
+                        waterBtn.setEnabled(true);
+                        waterBtn.setPressed(true);
+                    });
+                }
+            }, 1000);
+        });
+
+        fertilizeBtn.setOnClickListener(v -> {
+            playInteractionSound(fertilizeSnds);
+            plantController.fertilize();
+            updateInfo();
+
+            Timer buttonTimer = new Timer();
+            buttonTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    runOnUiThread(() -> {
+                        fertilizeBtn.setEnabled(true);
+                        fertilizeBtn.setPressed(true);
+                    });
+                }
+            }, 1000);
+        });
+
+        helpBtn.setOnClickListener(v -> {
+            if (helpBtn.isChecked()){
+                helpText.setVisibility(View.VISIBLE);
+                helpText.setText(
+                        "Planten din trenger å vokse! \n" +
+                                "Hold kameraet ditt mot et flatt område og trykk på en av prikkene som dukker opp. \n" +
+                                "Planten din trenger vann og gjødsel. Skadedyr kan også komme! \n" +
+                                "Konkurrér om å få den høyeste planten!"
+                );
+            } else {
+                helpText.setVisibility(View.INVISIBLE);
             }
         });
         
@@ -253,20 +232,17 @@ public class MainActivity extends AppCompatActivity {
             setUpDeveloperEnv();
         }    
 
-        helpBtn.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    timer = new Date().getTime();
-                } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    if (new Date().getTime() - timer > 3000){
-                        developerMode = !developerMode;
-                        setUpDeveloperEnv();
-                    }
-                    Log.d("time", Long.toString(new Date().getTime() - timer));
+        helpBtn.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                timer = new Date().getTime();
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (new Date().getTime() - timer > 3000){
+                    developerMode = !developerMode;
+                    setUpDeveloperEnv();
                 }
-                return false;
+                Log.d("time", Long.toString(new Date().getTime() - timer));
             }
+            return false;
         });
 
         ViewRenderable.builder()
@@ -363,7 +339,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        
     }
 
     private void playInteractionSound(int[] snds) {
@@ -435,9 +410,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        musicPlayer = MediaPlayer.create(this, R.raw.ambient_sun_2);
+        musicPlayer.setOnPreparedListener(mp -> mp.start());
+        musicPlayer.setOnCompletionListener(mp -> mp.start());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        musicPlayer.release();
+        musicPlayer = null;
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         saveData();
+        if (musicPlayer != null) {
+            musicPlayer.release();
+            musicPlayer = null;
+        }
     }
 
     @Override
