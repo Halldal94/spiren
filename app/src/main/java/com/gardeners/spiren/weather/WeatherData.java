@@ -85,7 +85,7 @@ public class WeatherData {
 
                     int index = timeSlots.indexOf(slot) + 6;
 
-                    if (index < 300) {
+                    if (index < 250) {
                         TimeSlot t = timeSlots.get(index);
                         double precipitation = 0;
                         String symbol;
