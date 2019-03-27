@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Random sndRandom = new Random();
     private int[] waterSnds, bugSpraySnds, fertilizeSnds, growSnds;
+    private MediaPlayer musicPlayer;
 
     private ModelRenderable flowerRenderable;
     private ModelRenderable leafRenderable;
@@ -110,8 +112,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         arFragment = (SpirenArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
         ((SpirenArFragment) arFragment).setActivity(this);
-
-
 
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
@@ -339,7 +339,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        
     }
 
     private void playInteractionSound(int[] snds) {
@@ -411,9 +410,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        musicPlayer = MediaPlayer.create(this, R.raw.ambient_sun_2);
+        musicPlayer.setOnPreparedListener(mp -> mp.start());
+        musicPlayer.setOnCompletionListener(mp -> mp.start());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        musicPlayer.release();
+        musicPlayer = null;
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         saveData();
+        if (musicPlayer != null) {
+            musicPlayer.release();
+            musicPlayer = null;
+        }
     }
 
     @Override
