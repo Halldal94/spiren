@@ -23,6 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.gardeners.spiren.weather.ForecastActivity;
 import com.gardeners.spiren.weather.Hour;
@@ -47,6 +48,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Dictionary;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
@@ -73,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imgView;
     private TextView height, bugCount;
     private ProgressBar health, water, fertilizer;
-    private ImageButton waterBtn, bugSprayBtn, fertilizeBtn, helpBtn;
+    private ImageButton waterBtn, bugSprayBtn, fertilizeBtn;
     private View statusBarView;
     private Button grow, bugs, action;
 
@@ -87,7 +91,8 @@ public class MainActivity extends AppCompatActivity {
 
     private long timer;
 
-    private ImageButton helpBtn;
+    private TextView helpText;
+    private ToggleButton helpBtn;
 
     // Weather data
     private WeatherData weather;
@@ -104,6 +109,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
 
+        //Setting up text and progress bars
+        plant = new Plant(this);
+        height = (TextView) findViewById(R.id.Height);
+        health = (ProgressBar) findViewById(R.id.Health);
+        water = (ProgressBar) findViewById(R.id.water);
+        fertalizer = (ProgressBar) findViewById(R.id.fertelizer);
+        helpText = (TextView) findViewById(R.id.helpText);
+
+        plant.growTimer();
+  
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -140,33 +155,92 @@ public class MainActivity extends AppCompatActivity {
         bugSprayBtn = (ImageButton) findViewById(R.id.bugspraybutton);
         fertilizeBtn = (ImageButton) findViewById(R.id.fertilizerbutton);
 
-        helpBtn = (ImageButton) findViewById(R.id.helpbutton);
+        helpBtn = (ToggleButton) findViewById(R.id.helpbutton);
 
+        bugSprayBtn.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                playInteractionSound(bugSpraySnds);
+                plantController.killBugs();
+                updateInfo();
+
+                Timer buttonTimer = new Timer();
+                buttonTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                bugSprayBtn.setEnabled(true);
+                                bugSprayBtn.setPressed(true);
+                            }
+                        });
+                    }
+                }, 1000);
+            }
+        });
+
+        waterBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                playInteractionSound(waterSnds);
+                plantController.water();
+                updateInfo();
+
+
+                Timer buttonTimer = new Timer();
+                buttonTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                waterBtn.setEnabled(true);
+                                waterBtn.setPressed(true);
+                            }
+                        });
+                    }
+                }, 1000);
+            }
+        });
+
+        fertalizeBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                playInteractionSound(fertilizeSnds);
+                plantController.fertilize();
+                updateInfo();
+
+                Timer buttonTimer = new Timer();
+                buttonTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                fertalizeBtn.setEnabled(true);
+                                fertalizeBtn.setPressed(true);
+                            }
+                        });
+                    }
+                }, 1000);
+            }
+        });
+
+        helpBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (helpBtn.isChecked()){
+                    helpText.setVisibility(View.VISIBLE);
+                    helpText.setText("Plants are cool. \nPlants are friends. \nIf you kill a plant, this is how it ends.");
+                } else {
+                    helpText.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+        
         if (developerMode) {
             setUpDeveloperEnv();
-        }
-
-        waterBtn.setOnClickListener(v -> {
-            playInteractionSound(waterSnds);
-            plantController.water();
-            updateInfo();
-        });
-
-        bugSprayBtn.setOnClickListener(v -> {
-            playInteractionSound(bugSpraySnds);
-            plantController.killBugs();
-            updateInfo();
-        });
-
-        fertilizeBtn.setOnClickListener(v -> {
-            playInteractionSound(fertilizeSnds);
-            plantController.fertilize();
-            updateInfo();
-        });
-
-        helpBtn.setOnClickListener(v -> {
-            //TODO
-        });
+        }    
 
         helpBtn.setOnTouchListener(new View.OnTouchListener() {
             @Override
