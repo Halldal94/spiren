@@ -155,6 +155,13 @@ public class MainActivity extends AppCompatActivity {
         helpBtn = (ToggleButton) findViewById(R.id.helpbutton);
         helpText = (TextView) findViewById(R.id.helpText);
 
+        waterBtn.setEnabled(true);
+        waterBtn.setPressed(true);
+        bugSprayBtn.setEnabled(true);
+        bugSprayBtn.setPressed(true);
+        fertilizeBtn.setEnabled(true);
+        fertilizeBtn.setPressed(true);
+
         bugSprayBtn.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 playInteractionSound(bugSpraySnds);
@@ -229,7 +236,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (helpBtn.isChecked()){
                     helpText.setVisibility(View.VISIBLE);
-                    helpText.setText("Plants are cool. \nPlants are friends. \nIf you kill a plant, this is how it ends.");
+                    helpText.setText(
+                                    "Planten din trenger å vokse! \n" +
+                                            "Hold kameraet ditt mot et flatt område og trykk på en av prikkene som dukker opp. \n" +
+                                            "Planten din trenger vann og gjødsel. Skadedyr kan også komme! \n" +
+                                            "Konkurrér om å få den høyeste planten!"
+                            );
                 } else {
                     helpText.setVisibility(View.INVISIBLE);
                 }
@@ -350,8 +362,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-
+        
     }
 
     private void playInteractionSound(int[] snds) {
