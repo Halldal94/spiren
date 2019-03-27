@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Weather data
     private WeatherData weather;
+    private static boolean weatherAvailable = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,8 +179,7 @@ public class MainActivity extends AppCompatActivity {
 
         tvTemperature.setOnClickListener((View v) -> {
             List<Hour> hours = weather.getHours();
-            if (hours.size() > 0) {
-
+            if (weatherAvailable && hours.size() > 0) {
                 String[] hourStrings = new String[hours.size()];
 
                 for (int i = 0; i < hours.size(); i++) {
@@ -189,7 +189,6 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, ForecastActivity.class);
                 intent.putExtra("hours", hourStrings);
                 startActivity(intent);
-
             }
         });
 
@@ -284,8 +283,8 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void updateTemperature() {
-
+    public static void setWeatherStatus(boolean status) {
+        weatherAvailable = status;
     }
 
 }

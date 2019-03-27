@@ -3,11 +3,9 @@ package com.gardeners.spiren.weather;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -15,7 +13,6 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.gardeners.spiren.R;
 import java.text.ParseException;
@@ -85,7 +82,7 @@ public class ForecastActivity extends AppCompatActivity {
 
             // Symbol
             ImageView view = new ImageView(this);
-            //view.setImageResource(getSymbol(hours.get(i).getSymbol()));
+            view.setImageResource(getSymbol(hours.get(i).getSymbol()));
             view.setScaleY(ratio);
             view.setScaleX(ratio);
             view.setBackgroundColor(color);
@@ -125,29 +122,30 @@ public class ForecastActivity extends AppCompatActivity {
 
     public int getSymbol(String symbol) {
         switch (symbol) {
-            /*case "Sun":
-            case "SleetSun":
-            case "LightSleetSun":*/
+            case "Sun": return R.drawable.weather_sun;
+            case "SleetSun": return R.drawable.weather_sleet_sun;
+            case "LightSleetSun": return R.drawable.weather_light_sleet_sun;
 
-            case "Cloud": return 0;
-            /*case "PartlyCloud":
-            case "LightCloud":
+            case "Cloud": return R.drawable.weather_cloud;
+            case "PartlyCloud":
+            case "LightCloud": return R.drawable.weather_light_cloud;
 
-            case "Rain":
-            case "LightRain":
+            case "Rain": return R.drawable.weather_rain;
             case "Drizzle":
+            case "LightRain": return R.drawable.weather_light_rain;
 
-            case "LightRainSun":
             case "DrizzleSun":
+            case "LightRainSun": return R.drawable.weather_light_rain_sun;
 
-            case "Snow":
-            case "LightSnow":
+            case "Snow": return R.drawable.weather_snow;
+            case "LightSnow": return R.drawable.weather_light_snow;
+            case "HeavySnow": return R.drawable.weather_heavy_snow;
 
-            case "Sleet":
-            case "HeavySleet":
-            case "LightSleet":*/
+            case "LightSleet":
+            case "Sleet": return R.drawable.weather_sleet;
+            case "HeavySleet": return R.drawable.weather_heavy_sleet;
+
             default: return 0;
-
         }
     }
 

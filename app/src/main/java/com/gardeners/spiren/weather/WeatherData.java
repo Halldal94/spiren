@@ -6,6 +6,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.gardeners.spiren.MainActivity;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -77,8 +80,6 @@ public class WeatherData {
             // from timeslot indexed 6 ahead, which includes precipitation from t to t+1
             // (e.g. 10:00 - 11:00)
 
-            List<String> symbolList = new ArrayList<>();
-
             for (TimeSlot slot : timeSlots) {
                 if ((slot.getTo().getTime() - slot.getFrom().getTime()) == 0) {
 
@@ -96,15 +97,10 @@ public class WeatherData {
                                 slot.getHumidity(), precipitation, symbol);
 
                         hours.add(h);
-                        if (!symbolList.contains(h.getSymbol())) {
-                            symbolList.add(h.getSymbol());
-                        }
                     }
 
                 }
             }
-
-            Log.i("tag", "hello");
 
             Calendar rightNow = Calendar.getInstance();
             int currentHour = rightNow.get(Calendar.HOUR_OF_DAY);
@@ -117,15 +113,9 @@ public class WeatherData {
             String temperature = String.valueOf(hours.get(0).getTemperature()) + "\u2103";
             tv.setText(temperature);
 
-            ArrayList<String> symbols = new ArrayList<>();
-
-            for (Hour h : hours) {
-                if (!symbols.contains(h.getSymbol())) {
-                    symbols.add(h.getSymbol());
-                }
-            }
-
             tries = 0;
+
+            MainActivity.setWeatherStatus(true);
         }
 
     }
