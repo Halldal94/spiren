@@ -75,8 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private ModelRenderable leafRenderable;
     private ModelRenderable potRenderable;
     private ModelRenderable stalkRenderable;
-    private ViewRenderable renderrable, statusBarRenderable;
-    private ImageView imgView;
+    private ViewRenderable statusBarRenderable;
     private TextView height, bugCount;
     private ProgressBar health, water, fertilizer;
     private ImageButton waterBtn, bugSprayBtn, fertilizeBtn;
