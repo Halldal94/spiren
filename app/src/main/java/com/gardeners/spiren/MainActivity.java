@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar health, water, fertilizer;
     private ImageButton waterBtn, bugSprayBtn, fertilizeBtn;
     private View statusBarView;
-    private Button grow, bugs, action;
+    private Button grow, bugs, action, reset;
 
     private boolean developerMode = false;
 
@@ -352,11 +352,13 @@ public class MainActivity extends AppCompatActivity {
             grow = (Button) findViewById(R.id.grow);
             bugs = (Button) findViewById(R.id.bugs);
             action = (Button) findViewById(R.id.action);
+            reset = (Button) findViewById(R.id.reset);
             heightSlider = (SeekBar) findViewById(R.id.heightSlider);
 
             grow.setVisibility(View.VISIBLE);
             bugs.setVisibility(View.VISIBLE);
             action.setVisibility(View.VISIBLE);
+            reset.setVisibility(View.VISIBLE);
             heightSlider.setVisibility(View.VISIBLE);
 
 
@@ -395,12 +397,21 @@ public class MainActivity extends AppCompatActivity {
             action.setOnClickListener(v -> {
                 if(developerMode){
                     plantController.resetPreviousAction();
+                    updateInfo();
+                }
+            });
+
+            reset.setOnClickListener(v -> {
+                if (developerMode) {
+                    plantController.initialize();
+                    updateInfo();
                 }
             });
         } else if (findViewById(R.id.grow).getVisibility() == View.VISIBLE){
             grow.setVisibility(View.INVISIBLE);
             bugs.setVisibility(View.INVISIBLE);
             action.setVisibility(View.INVISIBLE);
+            reset.setVisibility(View.INVISIBLE);
             heightSlider.setVisibility(View.INVISIBLE);
         }
         
