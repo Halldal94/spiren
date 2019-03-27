@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +20,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,51 +28,64 @@ import com.gardeners.spiren.weather.ForecastActivity;
 import com.gardeners.spiren.weather.Hour;
 import com.gardeners.spiren.weather.WeatherData;
 import com.google.ar.core.Anchor;
-import com.google.ar.core.AugmentedImageDatabase;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
-import com.google.ar.core.Session;
 import com.google.ar.sceneform.AnchorNode;
+import com.google.ar.sceneform.Node;
+import com.google.ar.sceneform.math.Quaternion;
+import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Date;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final double MIN_OPENGL_VERSION = 3.0;
 
     private ArFragment arFragment;
-    private ModelRenderable andyRenderable;
 
-    //Test status bar
-    private ViewRenderable renderrable;
+    private SoundPool soundPool;
+
+    private Random sndRandom = new Random();
+    private int[] waterSnds, bugSpraySnds, fertilizeSnds;
+
+    private ModelRenderable flowerRenderable;
+    private ModelRenderable leafRenderable;
+    private ModelRenderable potRenderable;
+    private ModelRenderable stalkRenderable;
+    private ViewRenderable renderrable, statusBarRenderable;
     private ImageView imgView;
+    private TextView height, bugCount;
+    private ProgressBar health, water, fertilizer;
+    private ImageButton waterBtn, bugSprayBtn, fertilizeBtn, helpBtn;
+    private View statusBarView;
+    private Button grow, bugs, action;
 
+    private boolean developerMode = false;
 
-    //private Session session;
+    private PlantModel plantModel;
+    private PlantController plantController;
+    private PlantView plantView;
 
-    private Plant plant;
+    private SeekBar heightSlider;
 
-    private TextView height;
-    private ProgressBar health;
-    private ProgressBar water;
-    private ProgressBar fertalizer;
-
-    private ImageButton waterBtn;
-    private ImageButton bugSprayBtn;
-    private ImageButton fertalizeBtn;
+    private long timer;
 
     private ImageButton helpBtn;
 
@@ -87,62 +104,121 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
 
-        //Setting up text and progress bars
-        plant = new Plant(this);
-        height = (TextView) findViewById(R.id.Height);
-        health = (ProgressBar) findViewById(R.id.Health);
-        water = (ProgressBar) findViewById(R.id.water);
-        fertalizer = (ProgressBar) findViewById(R.id.fertelizer);
-        plant.growTimer();
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        soundPool = new SoundPool.Builder()
+                .setMaxStreams(3)
+                .setAudioAttributes(audioAttributes)
+                .build();
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        waterSnds = new int[] {
+                soundPool.load(this, R.raw.water_1, 1),
+                soundPool.load(this, R.raw.water_2, 1)
+        };
+        bugSpraySnds = new int[] {
+                soundPool.load(this, R.raw.spray_1, 1)
+        };
+        fertilizeSnds = new int[] {
+                soundPool.load(this, R.raw.fertilize_1, 1),
+                soundPool.load(this, R.raw.fertilize_2, 1)
+        };
+
+        plantModel = new PlantModel();
+        plantController = new PlantController(plantModel, this);
+        plantController.initialize();
+        plantController.growTimer();
+
         loadData();
         updateInfo();
 
         //Setting up buttons
         waterBtn = (ImageButton) findViewById(R.id.watercanbutton);
         bugSprayBtn = (ImageButton) findViewById(R.id.bugspraybutton);
-        fertalizeBtn = (ImageButton) findViewById(R.id.fertilizerbutton);
+        fertilizeBtn = (ImageButton) findViewById(R.id.fertilizerbutton);
 
         helpBtn = (ImageButton) findViewById(R.id.helpbutton);
 
-        waterBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                plant.waterPlant();
-                updateInfo();
+        if (developerMode) {
+            setUpDeveloperEnv();
+        }
+
+        waterBtn.setOnClickListener(v -> {
+            playInteractionSound(waterSnds);
+            plantController.water();
+            updateInfo();
+        });
+
+        bugSprayBtn.setOnClickListener(v -> {
+            playInteractionSound(bugSpraySnds);
+            plantController.killBugs();
+            updateInfo();
+        });
+
+        fertilizeBtn.setOnClickListener(v -> {
+            playInteractionSound(fertilizeSnds);
+            plantController.fertilize();
+            updateInfo();
+        });
+
+        helpBtn.setOnClickListener(v -> {
+            //TODO
+        });
+
+        helpBtn.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    timer = new Date().getTime();
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (new Date().getTime() - timer > 3000){
+                        developerMode = !developerMode;
+                        setUpDeveloperEnv();
+                    }
+                    Log.d("time", Long.toString(new Date().getTime() - timer));
+                }
+                return false;
             }
         });
 
-        fertalizeBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                plant.fertelizerPlant();
-                updateInfo();
-            }
-        });
-
-        helpBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                //TODO
-            }
-        });
-
-        //AugmentedImageDatabase imageDatabase = new AugmentedImageDatabase(session);
-
-        // When you build a Renderable, Sceneform loads its resources in the background while returning
-        // a CompletableFuture. Call thenAccept(), handle(), or check isDone() before calling get().
-        ModelRenderable.builder()
-                .setSource(this, R.raw.andy)
+        ViewRenderable.builder()
+                .setView(this, R.layout.status_bar)
                 .build()
-                .thenAccept(renderable -> andyRenderable = renderable)
-                .exceptionally(
-                        throwable -> {
-                            Toast toast =
-                                    Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-                            toast.setGravity(Gravity.CENTER, 0, 0);
-                            toast.show();
-                            return null;
-                        });
+                .thenAccept(renderable -> statusBarRenderable = renderable)
+                .thenAccept(renderrable -> {
+                    statusBarView = statusBarRenderable.getView();
+                    height = statusBarView.findViewById(R.id.height);
+                    bugCount = statusBarView.findViewById(R.id.bug_count);
+                    health = statusBarView.findViewById(R.id.health);
+                    water = statusBarView.findViewById(R.id.water);
+                    fertilizer = statusBarView.findViewById(R.id.fertelizer);
+                });
+
+        CompletableFuture<ModelRenderable> flowerFuture = ModelRenderable.builder().setSource(this, R.raw.flower).build();
+        CompletableFuture<ModelRenderable> leafFuture = ModelRenderable.builder().setSource(this, R.raw.leaf).build();
+        CompletableFuture<ModelRenderable> potFuture = ModelRenderable.builder().setSource(this, R.raw.pot).build();
+        CompletableFuture<ModelRenderable> stalkFuture = ModelRenderable.builder().setSource(this, R.raw.stalk).build();
+        CompletableFuture.allOf(flowerFuture, leafFuture, potFuture, stalkFuture)
+                // .thenApply(future -> new ModelRenderable[] { flowerFuture.join(), potFuture.join(), stalkFuture.join() })
+                .thenRun(() -> {
+                    this.flowerRenderable = flowerFuture.join();
+                    this.leafRenderable = leafFuture.join();
+                    this.potRenderable = potFuture.join();
+                    this.stalkRenderable = stalkFuture.join();
+                })
+                .exceptionally(throwable -> {
+                    Toast toast =
+                            Toast.makeText(this, "Unable to load renderable", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    return null;
+                });
         arFragment.setOnTapArPlaneListener(
                 (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
-                    if (andyRenderable == null) {
+                    if (stalkRenderable == null) {
                         return;
                     }
 
@@ -151,27 +227,36 @@ public class MainActivity extends AppCompatActivity {
                     AnchorNode anchorNode = new AnchorNode(anchor);
                     anchorNode.setParent(arFragment.getArSceneView().getScene());
 
-                    // Create the transformable andy and add it to the anchor.
-                    TransformableNode andy = new TransformableNode(arFragment.getTransformationSystem());
-                    andy.setParent(anchorNode);
-                    andy.setRenderable(andyRenderable);
-                    andy.select();
+                    // Create the transformable pot and add it to the anchor.
+                    TransformableNode pot = new TransformableNode(arFragment.getTransformationSystem());
+                    pot.setLocalPosition(new Vector3(0.0F, 0.25F, 0.0F));
+                    pot.setParent(anchorNode);
+                    pot.setRenderable(potRenderable);
+                    pot.select();
+
+                    Node stalk = new Node();
+                    stalk.setLocalPosition(new Vector3(0.0F, 0.0F, 0.0F));
+                    stalk.setParent(pot);
+                    stalk.setRenderable(stalkRenderable);
+
+                    Node flowerNode = new Node();
+                    flowerNode.setLocalRotation(Quaternion.axisAngle(new Vector3(1.0F, 0.0F, 0.0F), 70.0F));
+                    flowerNode.setParent(pot);
+                    flowerNode.setRenderable(flowerRenderable);
+
+                    Node statusNode = new Node();
+                    statusNode.setLocalPosition(new Vector3(0.0F, 0.0F, 0.0F));
+                    statusNode.setLocalScale(new Vector3(0.7F, 0.7F, 0.7F));
+                    statusNode.setParent(pot);
+                    statusNode.setRenderable(statusBarRenderable);
+
+                    updateInfo();
+
+                    plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, statusNode, 0xDEADBEEFDEADBEEFL);
+                    plantView.setHeight(plantModel.getHeight());
                 });
-
-
-        /*
-        * Test "status bar"
-        *
-        ViewRenderable.builder()
-                .setView(this, R.layout.status_bar)
-                .build()
-                .thenAccept(renderable -> {
-                    ImageView imgView = (ImageView)renderrable.getView();
-                });
-        */
-
-
-        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-= Weather =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+                
+                        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-= Weather =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
         TextView tvTemperature = findViewById(R.id.tvTemperature);
         weather = new WeatherData(this, tvTemperature);
@@ -194,6 +279,71 @@ public class MainActivity extends AppCompatActivity {
 
         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+                
+    }
+
+    private void playInteractionSound(int[] snds) {
+        int snd = snds[sndRandom.nextInt(snds.length)];
+        soundPool.play(snd, 1.0F, 1.0F, 1, 0, 1.0F);
+    }
+
+    private void setUpDeveloperEnv() {
+        if(developerMode) {
+            grow = (Button) findViewById(R.id.grow);
+            bugs = (Button) findViewById(R.id.bugs);
+            action = (Button) findViewById(R.id.action);
+            heightSlider = (SeekBar) findViewById(R.id.heightSlider);
+
+            grow.setVisibility(View.VISIBLE);
+            bugs.setVisibility(View.VISIBLE);
+            action.setVisibility(View.VISIBLE);
+            heightSlider.setVisibility(View.VISIBLE);
+
+
+            heightSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (plantView != null) {
+                        plantView.setHeight(progress);
+                        plantModel.setHeight(progress);
+                        updateInfo();
+                    }
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
+            });
+
+            grow.setOnClickListener(v -> {
+                if(developerMode){
+                    plantController.grow();
+                }
+            });
+
+            bugs.setOnClickListener(v -> {
+                if(developerMode){
+                    plantController.bugSpawnerDev();
+                    updateInfo();
+                }
+            });
+
+            action.setOnClickListener(v -> {
+                if(developerMode){
+                    plantController.resetPreviousAction();
+                }
+            });
+        } else if (findViewById(R.id.grow).getVisibility() == View.VISIBLE){
+            grow.setVisibility(View.INVISIBLE);
+            bugs.setVisibility(View.INVISIBLE);
+            action.setVisibility(View.INVISIBLE);
+            heightSlider.setVisibility(View.INVISIBLE);
+        }
+        
     }
 
     @Override
@@ -201,6 +351,55 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         saveData();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        soundPool.release();
+    }
+
+    public void updateInfo(){
+        if(health != null){
+            height.setText(String.valueOf(plantModel.getHeight()) + " cm");
+            health.setProgress(plantModel.getHealth());
+            water.setProgress(plantModel.getWater());
+            fertilizer.setProgress(plantModel.getFertilizer());
+            bugCount.setText(plantModel.getBugs() + " Bugs");
+        }
+        if (plantView != null) {
+            plantView.setHeight(plantModel.getHeight());
+        }
+    }
+
+    private void saveData(){
+        String filename = "save";
+        JSONObject data = plantModel.toJson();
+        try {
+            FileOutputStream outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(data.toString().getBytes(Charset.forName("UTF-8")));
+            outputStream.close();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    private void loadData() {
+        String filename = "save";
+        File directory = this.getFilesDir();
+        File file = new File(directory, filename);
+        if(file.exists()) {
+            try {
+                byte[] encoded = Files.readAllBytes(file.toPath());
+                JSONObject data = new JSONObject(new String(encoded, Charset.forName("UTF-8")));
+                plantModel.fromJson(data);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     /**
      * Returns false and displays an error message if Sceneform can not run, true if Sceneform can run
@@ -210,58 +409,6 @@ public class MainActivity extends AppCompatActivity {
      *
      * <p>Finishes the activity if Sceneform can not run
      */
-
-    public void onDrawFrame(){
-        Log.i("System is", "drawing frame");
-    }
-
-    public void updateInfo(){
-        height.setText(String.valueOf(plant.getLength()) + " cm");
-        health.setProgress(plant.getHealth());
-        water.setProgress(plant.getWater());
-        fertalizer.setProgress(plant.getFertelizer());
-    }
-
-    private void saveData(){
-        String filename = "save";
-        JSONObject content = new JSONObject();
-        try {
-            content.put("length", plant.getLength());
-            content.put("health", plant.getHealth());
-            content.put("water", plant.getWater());
-            content.put("fertelizer", plant.getFertelizer());
-            content.put("bugs", plant.getBugs());
-            content.put("members", plant.getMembers());
-            content.put("level", plant.getLevel());
-            content.put("previus", plant.getPrevius().toString());
-            try {
-                FileOutputStream outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-                outputStream.write(content.toString().getBytes());
-                outputStream.close();
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadData() {
-        String filename = "save";
-        File directory = this.getFilesDir();
-        File file = new File(directory, filename);
-        if(file != null || file.exists()) {
-            try {
-                byte[] encoded = Files.readAllBytes(file.toPath());
-                JSONObject load = new JSONObject(new String(encoded));
-                plant.loadData(load);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
     public static boolean checkIsSupportedDeviceOrFinish(final Activity activity) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             Log.e(TAG, "Sceneform requires Android N or later");

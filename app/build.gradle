@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.ar.sceneform.plugin'
 
 android {
     compileSdkVersion 28
@@ -41,3 +42,24 @@ dependencies {
     // Alternatively, use ArSceneView without the UX dependency.
     implementation 'com.google.ar.sceneform:core:1.7.0'
 }
+
+
+sceneform.asset('sampledata/models/flower.obj',
+        'default',
+        'sampledata/models/flower.sfa',
+        'src/main/res/raw/flower')
+
+sceneform.asset('sampledata/models/leaf.obj',
+        'default',
+        'sampledata/models/leaf.sfa',
+        'src/main/res/raw/leaf')
+
+sceneform.asset('sampledata/models/pot.obj',
+        'default',
+        'sampledata/models/pot.sfa',
+        'src/main/res/raw/pot')
+
+sceneform.asset('sampledata/models/stalk.obj',
+        'default',
+        'sampledata/models/stalk.sfa',
+        'src/main/res/raw/stalk')
