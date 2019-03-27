@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private View statusBarView;
     private Button grow, bugs, action;
 
-    private boolean developerMode = true;
+    private boolean developerMode = false;
 
     private PlantModel plantModel;
     private PlantController plantController;
