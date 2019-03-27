@@ -109,16 +109,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
 
-        //Setting up text and progress bars
-        plant = new Plant(this);
-        height = (TextView) findViewById(R.id.Height);
-        health = (ProgressBar) findViewById(R.id.Health);
-        water = (ProgressBar) findViewById(R.id.water);
-        fertalizer = (ProgressBar) findViewById(R.id.fertelizer);
-        helpText = (TextView) findViewById(R.id.helpText);
 
-        plant.growTimer();
-  
+
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -156,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
         fertilizeBtn = (ImageButton) findViewById(R.id.fertilizerbutton);
 
         helpBtn = (ToggleButton) findViewById(R.id.helpbutton);
+        helpText = (TextView) findViewById(R.id.helpText);
 
         bugSprayBtn.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
@@ -204,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        fertalizeBtn.setOnClickListener(new View.OnClickListener() {
+        fertilizeBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 playInteractionSound(fertilizeSnds);
                 plantController.fertilize();
@@ -218,8 +211,8 @@ public class MainActivity extends AppCompatActivity {
 
                             @Override
                             public void run() {
-                                fertalizeBtn.setEnabled(true);
-                                fertalizeBtn.setPressed(true);
+                                fertilizeBtn.setEnabled(true);
+                                fertilizeBtn.setPressed(true);
                             }
                         });
                     }
@@ -329,7 +322,8 @@ public class MainActivity extends AppCompatActivity {
                     plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, statusNode, 0xDEADBEEFDEADBEEFL);
                     plantView.setHeight(plantModel.getHeight());
                 });
-                
+
+
                         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-= Weather =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
         TextView tvTemperature = findViewById(R.id.tvTemperature);
@@ -353,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
 
         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-                
+
     }
 
     private void playInteractionSound(int[] snds) {
