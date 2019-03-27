@@ -3,6 +3,9 @@ package com.gardeners.spiren;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -21,6 +24,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gardeners.spiren.weather.ForecastActivity;
+import com.gardeners.spiren.weather.Hour;
+import com.gardeners.spiren.weather.WeatherData;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
@@ -41,6 +47,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.List;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -77,6 +86,12 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar heightSlider;
 
     private long timer;
+
+    private ImageButton helpBtn;
+
+    // Weather data
+    private WeatherData weather;
+    private static boolean weatherAvailable = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -240,6 +255,31 @@ public class MainActivity extends AppCompatActivity {
                     plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, statusNode, 0xDEADBEEFDEADBEEFL);
                     plantView.setHeight(plantModel.getHeight());
                 });
+                
+                        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-= Weather =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+        TextView tvTemperature = findViewById(R.id.tvTemperature);
+        weather = new WeatherData(this, tvTemperature);
+        weather.download();
+
+        tvTemperature.setOnClickListener((View v) -> {
+            List<Hour> hours = weather.getHours();
+            if (weatherAvailable && hours.size() > 0) {
+                String[] hourStrings = new String[hours.size()];
+
+                for (int i = 0; i < hours.size(); i++) {
+                    hourStrings[i] = hours.get(i).toString();
+                }
+
+                Intent intent = new Intent(MainActivity.this, ForecastActivity.class);
+                intent.putExtra("hours", hourStrings);
+                startActivity(intent);
+            }
+        });
+
+        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+                
     }
 
     private void playInteractionSound(int[] snds) {
@@ -303,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
             action.setVisibility(View.INVISIBLE);
             heightSlider.setVisibility(View.INVISIBLE);
         }
+        
     }
 
     @Override
@@ -388,4 +429,9 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
+    public static void setWeatherStatus(boolean status) {
+        weatherAvailable = status;
+    }
+
 }
