@@ -1,0 +1,24 @@
+# Blender MTL File: 'plante.blend'
+# Material Count: 2
+
+newmtl Soil
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.156789 0.056443 0.014300
+Ks 0.034987 0.034987 0.034987
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd textures/soil.jpg
+
+newmtl Terracotta
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.465169 0.216416 0.139766
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd textures/fired_clay_terracotta_flooring.jpg
