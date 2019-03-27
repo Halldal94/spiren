@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
                     bugCount = statusBarView.findViewById(R.id.bug_count);
                     health = statusBarView.findViewById(R.id.health);
                     water = statusBarView.findViewById(R.id.water);
-                    fertilizer = statusBarView.findViewById(R.id.fertelizer);
+                    fertilizer = statusBarView.findViewById(R.id.fertilizer);
                 });
 
         CompletableFuture<ModelRenderable> flowerFuture = ModelRenderable.builder().setSource(this, R.raw.flower).build();
@@ -264,7 +264,6 @@ public class MainActivity extends AppCompatActivity {
         CompletableFuture<ModelRenderable> potFuture = ModelRenderable.builder().setSource(this, R.raw.pot).build();
         CompletableFuture<ModelRenderable> stalkFuture = ModelRenderable.builder().setSource(this, R.raw.stalk).build();
         CompletableFuture.allOf(flowerFuture, leafFuture, potFuture, stalkFuture)
-                // .thenApply(future -> new ModelRenderable[] { flowerFuture.join(), potFuture.join(), stalkFuture.join() })
                 .thenRun(() -> {
                     this.flowerRenderable = flowerFuture.join();
                     this.leafRenderable = leafFuture.join();
@@ -284,6 +283,11 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
+                    if (plantView != null) {
+                        plantView.removeFromScene(arFragment.getArSceneView().getScene());
+                        plantView = null;
+                    }
+
                     // Create the Anchor.
                     Anchor anchor = hitResult.createAnchor();
                     AnchorNode anchorNode = new AnchorNode(anchor);
@@ -291,34 +295,44 @@ public class MainActivity extends AppCompatActivity {
 
                     // Create the transformable pot and add it to the anchor.
                     TransformableNode pot = new TransformableNode(arFragment.getTransformationSystem());
-                    pot.setLocalPosition(new Vector3(0.0F, 0.25F, 0.0F));
                     pot.setParent(anchorNode);
                     pot.setRenderable(potRenderable);
                     pot.select();
 
+                    Node root = new Node();
+                    root.setLocalPosition(new Vector3(0.0F, 0.25F, 0.0F));
+                    root.setParent(pot);
+
                     Node stalk = new Node();
-                    stalk.setLocalPosition(new Vector3(0.0F, 0.0F, 0.0F));
-                    stalk.setParent(pot);
+                    stalk.setParent(root);
                     stalk.setRenderable(stalkRenderable);
 
                     Node flowerNode = new Node();
                     flowerNode.setLocalRotation(Quaternion.axisAngle(new Vector3(1.0F, 0.0F, 0.0F), 70.0F));
-                    flowerNode.setParent(pot);
+                    flowerNode.setParent(root);
                     flowerNode.setRenderable(flowerRenderable);
 
                     Node statusNode = new Node();
-                    statusNode.setLocalPosition(new Vector3(0.0F, 0.0F, 0.0F));
-                    statusNode.setLocalScale(new Vector3(0.7F, 0.7F, 0.7F));
-                    statusNode.setParent(pot);
+                    statusNode.setParent(root);
                     statusNode.setRenderable(statusBarRenderable);
 
                     updateInfo();
 
-                    plantView = new PlantView(leafRenderable, pot, stalk, flowerNode, statusNode, 0xDEADBEEFDEADBEEFL, plantModel.getHeight());
+                    plantView = new PlantView(
+                            leafRenderable,
+                            anchorNode,
+                            root,
+                            stalk,
+                            flowerNode,
+                            statusNode,
+                            height,
+                            0xDEADBEEFDEADBEEFL,
+                            plantModel.getHeight()
+                    );
                 });
 
 
-                        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-= Weather =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-= Weather =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
         TextView tvTemperature = findViewById(R.id.tvTemperature);
         weather = new WeatherData(this, tvTemperature);
@@ -426,8 +440,8 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         musicPlayer = MediaPlayer.create(this, R.raw.ambient_sun_2);
-        musicPlayer.setOnPreparedListener(mp -> mp.start());
-        musicPlayer.setOnCompletionListener(mp -> mp.start());
+        musicPlayer.setOnPreparedListener(MediaPlayer::start);
+        musicPlayer.setOnCompletionListener(MediaPlayer::start);
     }
 
     @Override
@@ -455,11 +469,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void updateInfo(){
         if(health != null){
-            height.setText(String.valueOf(plantModel.getHeight()) + " cm");
             health.setProgress(plantModel.getHealth());
             water.setProgress(plantModel.getWater());
             fertilizer.setProgress(plantModel.getFertilizer());
-            bugCount.setText(plantModel.getBugs() + " Bugs");
+            bugCount.setText(plantModel.getBugs() + " skadedyr");
+            bugCount.setTextColor(plantModel.getBugs() > 0 ? 0xFFAF0000 : 0xFF00AF00);
             updateButtons();
         }
         if (plantView != null) {
