@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity {
                     plantView.setHeight(plantModel.getHeight());
                 });
 
-        /*
+
                         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-= Weather =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
         TextView tvTemperature = findViewById(R.id.tvTemperature);
@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        */
+        
     }
 
     private void playInteractionSound(int[] snds) {
