@@ -197,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
             }, 1000);
         });
 
+
         fertilizeBtn.setOnClickListener(v -> {
             playInteractionSound(fertilizeSnds);
             plantController.fertilize();
@@ -218,10 +219,10 @@ public class MainActivity extends AppCompatActivity {
             if (helpBtn.isChecked()){
                 helpText.setVisibility(View.VISIBLE);
                 helpText.setText(
-                        "Planten din trenger å vokse! \n" +
-                                "Hold kameraet ditt mot et flatt område og trykk på en av prikkene som dukker opp. \n" +
-                                "Planten din trenger vann og gjødsel. Skadedyr kan også komme! \n" +
-                                "Konkurrér om å få den høyeste planten!"
+                        "Planten din trenger å vokse!\n\n" +
+                                           "Hold kameraet ditt mot et flatt område og trykk på en av prikkene som dukker opp. \n\n" +
+                                            "Planten din trenger vann og gjødsel. Skadedyr kan også komme! \n\n" +
+                                            "Konkurrér om å få den høyeste planten!"
                 );
             } else {
                 helpText.setVisibility(View.INVISIBLE);
