@@ -16,6 +16,7 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/testview"
     android:layout_width="120dp"
     android:layout_height="wrap_content"
@@ -46,22 +47,27 @@
 
     <ProgressBar
         android:id="@+id/health"
-        style="?android:attr/progressBarStyleHorizontal"
+        style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="50"
         android:max="100"
+        android:minHeight="20dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
         android:progress="50"
-        android:progressTint="@color/colorAccent" />
+        android:progressTint="@color/health" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp">
 
         <ProgressBar
             android:id="@+id/water"
-            style="?android:attr/progressBarStyleHorizontal"
+            style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="86dp"
             android:layout_height="match_parent"
             android:max="100"
@@ -78,11 +84,13 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp">
 
         <ProgressBar
-            android:id="@+id/fertelizer"
-            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/fertilizer"
+            style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="86dp"
             android:layout_height="match_parent"
             android:max="100"
@@ -91,15 +99,18 @@
 
         <ImageView
             android:id="@+id/imageView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="15dp"
             android:layout_weight="1"
+            android:scaleType="centerInside"
             app:srcCompat="@drawable/poo" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/bug_count"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
 
 </LinearLayout>

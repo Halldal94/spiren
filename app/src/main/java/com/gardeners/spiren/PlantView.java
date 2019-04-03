@@ -1,7 +1,11 @@
 package com.gardeners.spiren;
 
+import android.widget.TextView;
+
+import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.Node;
+import com.google.ar.sceneform.Scene;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
@@ -15,22 +19,26 @@ public class PlantView {
     private static final float GROWTH_CM_PER_SECOND = 2.0F;
 
     private final ModelRenderable leafRenderable;
+    private final AnchorNode anchorNode;
     private final Node root;
     private final Node stalk;
     private final Node flower;
     private final Node status;
+    private final TextView heightView;
     private final List<Node> leaves;
     private final long seed;
 
     private float internalHeight;
     private int targetHeight;
 
-    public PlantView(ModelRenderable leafRenderable, Node root, Node stalk, Node flower, Node status, long seed, int height) {
+    public PlantView(ModelRenderable leafRenderable, AnchorNode anchorNode, Node root, Node stalk, Node flower, Node status, TextView heightView, long seed, int height) {
         this.leafRenderable = leafRenderable;
+        this.anchorNode = anchorNode;
         this.root = root;
         this.stalk = stalk;
         this.flower = flower;
         this.status = status;
+        this.heightView = heightView;
         this.leaves = new ArrayList<>();
         this.seed = seed;
         this.internalHeight = height;
@@ -60,11 +68,13 @@ public class PlantView {
         float stalkHeight = height / 100.0F;
         float stalkThickness = 0.175F + height / 300.0F;
         float flowerSize = 0.25F + height / 150.0F;
+        float statusSize = 0.25F + height / 1000.0F;
 
         stalk.setLocalScale(new Vector3(stalkThickness, stalkHeight, stalkThickness));
         flower.setLocalPosition(new Vector3(0.0F, stalkHeight, 0.0F));
         flower.setLocalScale(new Vector3(flowerSize, flowerSize, flowerSize));
-        status.setLocalPosition(new Vector3(0.35F, height / 200.0F, 0.0f));
+        status.setLocalPosition(new Vector3(2.0F * statusSize / 3.0F, height / 200.0F, 0.0f));
+        status.setLocalScale(new Vector3(statusSize, statusSize, statusSize));
 
         int numLeaves = Math.max(0, ((int) height - 10) / LEAF_SPARSITY);
 
@@ -94,5 +104,11 @@ public class PlantView {
             // Quaternion xRotation = Quaternion.axisAngle(new Vector3(1.0F, 0.0F, 0.0F), random.nextFloat() * 60.0F - 30.0F);
             leaf.setLocalRotation(Quaternion.multiply(yRotation, xRotation));
         }
+
+        heightView.setText(String.valueOf(Math.round(height)) + " cm");
+    }
+
+    public void removeFromScene(Scene scene) {
+        scene.removeChild(anchorNode);
     }
 }

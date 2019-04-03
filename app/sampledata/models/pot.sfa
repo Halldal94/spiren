@@ -46,7 +46,7 @@
     collision: {},
     file: 'sampledata/models/pot.obj',
     name: 'pot',
-    recenter: false,
+    recenter: 'root',
     scale: 0.01,
   },
   samplers: [
